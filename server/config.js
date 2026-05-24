@@ -19,6 +19,12 @@ function parseOrigins(value) {
   return String(value || "")
     .split(",")
     .map((origin) => origin.trim())
+    .map((origin) => {
+      if (!origin) return "";
+      if (!/^https?:\/\//i.test(origin)) return `https://${origin}`;
+      return origin;
+    })
+    .map((origin) => origin.replace(/\/+$/, ""))
     .filter(Boolean);
 }
 
@@ -48,18 +54,26 @@ function validateProductionEnv() {
 
 validateProductionEnv();
 
+const frontendUrl = (process.env.FRONTEND_URL || "http://localhost:5173").replace(/\/+$/, "");
+const corsOrigins = Array.from(
+  new Set([
+    ...parseOrigins(process.env.CORS_ORIGINS),
+    frontendUrl,
+  ].filter(Boolean))
+);
+
 module.exports = {
   port: parseInteger("PORT", 5000),
   nodeEnv,
   isProduction,
   trustProxy: process.env.TRUST_PROXY === "true" || isProduction,
   cors: {
-    origins: parseOrigins(process.env.CORS_ORIGINS),
+    origins: corsOrigins,
   },
   auth: {
     allowPasswordAuth: process.env.ALLOW_PASSWORD_AUTH !== "false",
     adminEmails: parseList(process.env.ADMIN_EMAILS || "masteroman1234@gmail.com"),
-    frontendUrl: process.env.FRONTEND_URL || "http://localhost:5173",
+    frontendUrl,
     github: {
       clientId: process.env.GITHUB_CLIENT_ID || "",
       clientSecret: process.env.GITHUB_CLIENT_SECRET || "",

@@ -2,6 +2,18 @@ const { prisma } = require("../prisma/client");
 const fs = require("fs");
 const path = require("path");
 
+function readBuiltinQuestions(topic) {
+  const jsonPath = path.join(__dirname, `../data/questions/${topic}.json`);
+  if (!fs.existsSync(jsonPath)) return [];
+
+  return JSON.parse(fs.readFileSync(jsonPath, "utf-8")).map((question, index) => ({
+    id: question.id || `builtin-${topic}-${index}`,
+    source: question.source || "builtin",
+    type: question.type || "theory",
+    ...question,
+  }));
+}
+
 // Get all questions for a topic
 async function getQuestionsByTopic(req, res) {
   const { topic } = req.params;
@@ -17,19 +29,13 @@ async function getQuestionsByTopic(req, res) {
       orderBy: { createdAt: "desc" },
     });
 
-    // Fallback to JSON if database is empty
-    if (questions.length === 0) {
-      const jsonPath = path.join(
-        __dirname,
-        `../data/questions/${topic}.json`
-      );
-      if (fs.existsSync(jsonPath)) {
-        const jsonData = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
-        return res.json(jsonData);
-      }
-    }
+    const builtinQuestions = readBuiltinQuestions(topic).filter((question) => {
+      if (difficulty && question.difficulty !== difficulty) return false;
+      if (type && question.type !== type) return false;
+      return true;
+    });
 
-    res.json(questions);
+    res.json([...questions, ...builtinQuestions]);
   } catch (error) {
     console.error("❌ Get questions error:", error);
     res.status(500).json({ error: error.message });
@@ -44,6 +50,11 @@ async function getQuestion(req, res) {
     const question = await prisma.question.findFirst({
       where: { id: questionId, topic },
     });
+
+    if (!question && questionId.startsWith("builtin-")) {
+      const builtin = readBuiltinQuestions(topic).find((item) => item.id === questionId);
+      if (builtin) return res.json(builtin);
+    }
 
     if (!question) {
       return res.status(404).json({ error: "Question not found" });

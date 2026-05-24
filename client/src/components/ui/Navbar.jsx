@@ -27,9 +27,12 @@ const Navbar = () => {
   }, [])
 
   const logout = async () => {
-    await authAPI.logout()
-    clearUser()
-    navigate('/dashboard')
+    try {
+      await authAPI.logout()
+    } finally {
+      clearUser()
+      navigate('/dashboard')
+    }
   }
 
   return (

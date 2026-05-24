@@ -31,7 +31,9 @@ function createApp() {
         return callback(null, true);
       }
 
-      if (config.cors.origins.includes(origin)) {
+      const normalizedOrigin = origin.replace(/\/+$/, "");
+
+      if (config.cors.origins.includes(normalizedOrigin)) {
         return callback(null, true);
       }
 
