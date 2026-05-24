@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: interview-hub-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-om_2026}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-interviewdb}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - interview-hub-postgres:/var/lib/postgresql/data
+      - ./server/prisma/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U om_2026 -d interviewdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  interview-hub-postgres:

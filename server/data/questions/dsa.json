@@ -1,0 +1,44 @@
+[
+  {
+    "id": "dsa_1",
+    "topic": "dsa",
+    "questionText": "Explain the difference between an array and a linked list.",
+    "answerText": "Arrays store elements contiguously in memory and provide O(1) random access. Linked lists use nodes with pointers and require O(n) time for access but allow O(1) insertion/deletion at known positions. Arrays are better for frequent access, linked lists for frequent insertions/deletions.",
+    "difficulty": "easy",
+    "type": "theory"
+  },
+  {
+    "id": "dsa_2",
+    "topic": "dsa",
+    "questionText": "Implement a function to reverse a linked list.",
+    "answerText": "Use three pointers: prev, curr, next. Iterate through the list, reversing the direction of pointers at each node. Time: O(n), Space: O(1).",
+    "difficulty": "medium",
+    "type": "coding",
+    "starterCode": "function reverseLinkedList(head) {\n  // Your code here\n  return head;\n}"
+  },
+  {
+    "id": "dsa_3",
+    "topic": "dsa",
+    "questionText": "What is the time complexity of binary search?",
+    "answerText": "Binary search has O(log n) time complexity because it divides the search space in half at each step. Space complexity is O(1) for iterative and O(log n) for recursive implementations.",
+    "difficulty": "easy",
+    "type": "theory"
+  },
+  {
+    "id": "dsa_4",
+    "topic": "dsa",
+    "questionText": "Implement a solution to find the longest common subsequence (LCS) of two strings.",
+    "answerText": "Use dynamic programming with a 2D table where dp[i][j] represents the LCS length for first i and j characters. If characters match, dp[i][j] = dp[i-1][j-1] + 1, otherwise take the maximum of dp[i-1][j] and dp[i][j-1]. Time: O(m*n), Space: O(m*n).",
+    "difficulty": "hard",
+    "type": "coding",
+    "starterCode": "function longestCommonSubsequence(text1, text2) {\n  // Your code here\n  return 0;\n}"
+  },
+  {
+    "id": "dsa_5",
+    "topic": "dsa",
+    "questionText": "Explain hash tables and how collision handling works.",
+    "answerText": "Hash tables use a hash function to map keys to array indices. Collisions occur when multiple keys hash to the same index. Common collision handling methods: 1) Chaining: store multiple values in linked lists, 2) Open addressing: find another empty slot (linear/quadratic probing). Chaining is generally preferred.",
+    "difficulty": "medium",
+    "type": "theory"
+  }
+]

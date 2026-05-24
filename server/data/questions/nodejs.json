@@ -1,0 +1,43 @@
+[
+  {
+    "id": "node_1",
+    "topic": "nodejs",
+    "questionText": "Explain the Node.js event loop.",
+    "answerText": "Single-threaded but non-blocking. Event loop handles callbacks. Phases: timers, pending callbacks, idle/prepare, poll (I/O), check, close. Microtasks (promises) run between phases. libuv library manages the loop.",
+    "difficulty": "hard",
+    "type": "theory"
+  },
+  {
+    "id": "node_2",
+    "topic": "nodejs",
+    "questionText": "What are streams in Node.js?",
+    "answerText": "Streams process data in chunks rather than loading entirely. Types: readable, writable, duplex, transform. Benefits: memory efficient, composable. Examples: file reading, HTTP requests/responses, compression.",
+    "difficulty": "medium",
+    "type": "theory"
+  },
+  {
+    "id": "node_3",
+    "topic": "nodejs",
+    "questionText": "What is middleware in Express?",
+    "answerText": "Middleware functions process requests/responses. Called in order. Can modify req/res, end request, or pass to next middleware. Signature: (req, res, next) => {}. Used for authentication, logging, error handling.",
+    "difficulty": "easy",
+    "type": "theory"
+  },
+  {
+    "id": "node_4",
+    "topic": "nodejs",
+    "questionText": "Implement an async/await based route handler.",
+    "answerText": "Wrap route in async function, use await for promises. Wrap in try/catch for error handling. Pass errors to next() for Express error handling.",
+    "difficulty": "medium",
+    "type": "coding",
+    "starterCode": "router.get('/data', async (req, res, next) => {\n  // Your code here\n});"
+  },
+  {
+    "id": "node_5",
+    "topic": "nodejs",
+    "questionText": "What is the difference between process.nextTick and setImmediate?",
+    "answerText": "nextTick: microtask, executed after current operation completes. setImmediate: macrotask, executed in next event loop iteration. nextTick higher priority. Generally use setImmediate for heavy work.",
+    "difficulty": "hard",
+    "type": "theory"
+  }
+]

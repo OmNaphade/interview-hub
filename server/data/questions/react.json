@@ -1,0 +1,42 @@
+[
+  {
+    "id": "react_1",
+    "topic": "react",
+    "questionText": "What is the difference between controlled and uncontrolled components?",
+    "answerText": "Controlled: React state manages input value, provides onChange handler. Uncontrolled: DOM manages value via ref. Controlled preferred for form validation and complex forms. Uncontrolled simpler but less control.",
+    "difficulty": "medium",
+    "type": "theory"
+  },
+  {
+    "id": "react_2",
+    "topic": "react",
+    "questionText": "Explain React hooks and provide examples.",
+    "answerText": "Hooks allow functional components to use state and effects. useState: manage state. useEffect: handle side effects. useContext: access context. useReducer: complex state logic. Rules: only call in function body, not conditionally.",
+    "difficulty": "medium",
+    "type": "theory"
+  },
+  {
+    "id": "react_3",
+    "topic": "react",
+    "questionText": "What is the virtual DOM and why is it important?",
+    "answerText": "Virtual DOM: in-memory representation of real DOM. React compares old and new virtual DOM (diffing) and batches updates. Only changed elements update in real DOM. Improves performance and abstracts browser differences.",
+    "difficulty": "easy",
+    "type": "theory"
+  },
+  {
+    "id": "react_4",
+    "topic": "react",
+    "questionText": "How do you optimize React component performance?",
+    "answerText": "Techniques: React.memo for memoization, useMemo for expensive calculations, useCallback for stable functions, lazy loading with React.lazy, code splitting, removing unused dependencies. Profiler tool identifies bottlenecks.",
+    "difficulty": "hard",
+    "type": "theory"
+  },
+  {
+    "id": "react_5",
+    "topic": "react",
+    "questionText": "What are keys in React lists and why are they important?",
+    "answerText": "Keys help React identify which items changed/added/removed. Use unique, stable identifiers (IDs, not indexes). Without proper keys, component state gets mixed up during list reordering. Critical for performance and correctness.",
+    "difficulty": "medium",
+    "type": "theory"
+  }
+]

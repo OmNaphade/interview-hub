@@ -1,0 +1,38 @@
+{
+  "name": "interview-hub-server",
+  "version": "1.0.0",
+  "description": "Interview Preparation & AI Assistant Backend",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "start:prod": "prisma migrate deploy && node index.js",
+    "dev": "nodemon index.js",
+    "postinstall": "prisma generate",
+    "deploy:migrate": "prisma migrate deploy",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:seed": "node prisma/seed.js",
+    "prisma:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.7.0",
+    "axios": "^1.7.0",
+    "cheerio": "^1.0.0-rc.12",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^8.5.2",
+    "helmet": "^8.2.0",
+    "mammoth": "^1.6.0",
+    "node-fetch": "^3.3.2",
+    "pdf-parse": "^1.1.1",
+    "prisma": "^5.7.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

@@ -1,0 +1,42 @@
+[
+  {
+    "id": "devops_1",
+    "topic": "devops",
+    "questionText": "Explain continuous integration and continuous deployment.",
+    "answerText": "CI: automatically test code on every commit. CD: automatically deploy tested code to production. Benefits: faster feedback, reduced manual errors, frequent releases. Tools: GitHub Actions, Jenkins, CircleCI.",
+    "difficulty": "medium",
+    "type": "theory"
+  },
+  {
+    "id": "devops_2",
+    "topic": "devops",
+    "questionText": "What are Docker containers and why are they useful?",
+    "answerText": "Containers package application with dependencies in isolated environment. Lightweight compared to VMs. Enable consistent deployment across environments. Facilitate microservices architecture. Use Docker for containerization.",
+    "difficulty": "easy",
+    "type": "theory"
+  },
+  {
+    "id": "devops_3",
+    "topic": "devops",
+    "questionText": "Explain Kubernetes and its main components.",
+    "answerText": "Kubernetes: container orchestration platform. Components: Pod (smallest unit), Node (worker machine), Cluster (collection of nodes), Service (network abstraction). Handles deployment, scaling, networking. Steep learning curve but powerful.",
+    "difficulty": "hard",
+    "type": "theory"
+  },
+  {
+    "id": "devops_4",
+    "topic": "devops",
+    "questionText": "What is Infrastructure as Code (IaC)?",
+    "answerText": "Define infrastructure through code/configuration files (Terraform, CloudFormation). Benefits: version control, reproducibility, automation, documentation. Version infrastructure like application code.",
+    "difficulty": "medium",
+    "type": "theory"
+  },
+  {
+    "id": "devops_5",
+    "topic": "devops",
+    "questionText": "Explain monitoring and logging in DevOps.",
+    "answerText": "Monitoring: track system metrics (CPU, memory, response time). Logging: record application/system events. Together enable quick issue identification and debugging. Tools: Prometheus, ELK stack, DataDog.",
+    "difficulty": "medium",
+    "type": "theory"
+  }
+]

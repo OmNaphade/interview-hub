@@ -1,0 +1,42 @@
+[
+  {
+    "id": "net_1",
+    "topic": "networking",
+    "questionText": "Explain the OSI model layers.",
+    "answerText": "7 layers: Physical (cables), Data Link (MAC), Network (IP), Transport (TCP/UDP), Session (connections), Presentation (encryption), Application (HTTP). Each layer adds its own header (encapsulation). Used for troubleshooting and protocol design.",
+    "difficulty": "medium",
+    "type": "theory"
+  },
+  {
+    "id": "net_2",
+    "topic": "networking",
+    "questionText": "What is the difference between TCP and UDP?",
+    "answerText": "TCP: reliable, ordered, connection-oriented, slower, error-checking. UDP: unreliable, connectionless, faster, no ordering guarantee. Use TCP for important data (HTTP, email), UDP for speed (video, DNS).",
+    "difficulty": "easy",
+    "type": "theory"
+  },
+  {
+    "id": "net_3",
+    "topic": "networking",
+    "questionText": "Explain SSL/TLS handshake.",
+    "answerText": "Client sends hello with supported ciphers. Server responds with certificate and chosen cipher. Exchange key material using asymmetric encryption. Switch to symmetric encryption for session. Provides confidentiality and authenticity.",
+    "difficulty": "hard",
+    "type": "theory"
+  },
+  {
+    "id": "net_4",
+    "topic": "networking",
+    "questionText": "What is DNS and how does it work?",
+    "answerText": "DNS translates domain names to IP addresses. Client queries resolver, which queries root nameserver, TLD nameserver, then authoritative nameserver. Results cached at multiple levels. Uses UDP for queries, TCP for zone transfers.",
+    "difficulty": "medium",
+    "type": "theory"
+  },
+  {
+    "id": "net_5",
+    "topic": "networking",
+    "questionText": "Explain HTTP request/response cycle.",
+    "answerText": "Client sends request (method, path, headers, body). Server processes and sends response (status, headers, body). Methods: GET (retrieve), POST (create), PUT (update), DELETE (remove). Status codes: 2xx success, 3xx redirect, 4xx client error, 5xx server error.",
+    "difficulty": "easy",
+    "type": "theory"
+  }
+]

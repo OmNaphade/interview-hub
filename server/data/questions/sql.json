@@ -1,0 +1,43 @@
+[
+  {
+    "id": "sql_1",
+    "topic": "sql",
+    "questionText": "Explain the difference between INNER JOIN and LEFT JOIN.",
+    "answerText": "INNER JOIN: returns only matching rows from both tables. LEFT JOIN: returns all rows from left table and matching rows from right table (NULL for non-matches). Choose based on whether you want to exclude non-matching rows.",
+    "difficulty": "easy",
+    "type": "theory"
+  },
+  {
+    "id": "sql_2",
+    "topic": "sql",
+    "questionText": "Write a query to find the second highest salary.",
+    "answerText": "Use LIMIT with OFFSET or window functions: SELECT salary FROM employees ORDER BY salary DESC LIMIT 1 OFFSET 1. Or use MAX(salary) with subquery.",
+    "difficulty": "medium",
+    "type": "coding",
+    "starterCode": "-- Your SQL query here"
+  },
+  {
+    "id": "sql_3",
+    "topic": "sql",
+    "questionText": "What is a window function?",
+    "answerText": "Window functions compute values across rows while maintaining individual rows. Syntax: function() OVER (PARTITION BY ... ORDER BY ...). Examples: ROW_NUMBER, RANK, LAG, LEAD. Useful for analytics without aggregation.",
+    "difficulty": "hard",
+    "type": "theory"
+  },
+  {
+    "id": "sql_4",
+    "topic": "sql",
+    "questionText": "Explain GROUP BY and HAVING.",
+    "answerText": "GROUP BY: groups rows by specified columns. HAVING: filters groups (like WHERE but for grouped data). WHERE filters rows before grouping, HAVING after. Often combined with aggregate functions.",
+    "difficulty": "medium",
+    "type": "theory"
+  },
+  {
+    "id": "sql_5",
+    "topic": "sql",
+    "questionText": "What is the difference between UNION and UNION ALL?",
+    "answerText": "UNION: combines results from multiple queries and removes duplicates (slower). UNION ALL: keeps duplicates (faster). Both require same column count and compatible types. UNION ALL preferred if duplicates acceptable.",
+    "difficulty": "easy",
+    "type": "theory"
+  }
+]

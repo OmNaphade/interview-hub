@@ -1,0 +1,43 @@
+[
+  {
+    "id": "js_1",
+    "topic": "javascript",
+    "questionText": "Explain the difference between var, let, and const.",
+    "answerText": "var: function-scoped, hoisted, can be redeclared. let: block-scoped, hoisted (TDZ), cannot be redeclared. const: block-scoped, hoisted (TDZ), must be initialized, cannot be reassigned (but properties can be modified if object). Use const by default, let if you need reassignment.",
+    "difficulty": "easy",
+    "type": "theory"
+  },
+  {
+    "id": "js_2",
+    "topic": "javascript",
+    "questionText": "What is closure and provide an example.",
+    "answerText": "A closure is a function that has access to variables from its outer (enclosing) function's scope even after the outer function returns. Closures are created every time a function is created.",
+    "difficulty": "medium",
+    "type": "theory"
+  },
+  {
+    "id": "js_3",
+    "topic": "javascript",
+    "questionText": "Implement a function that flattens a nested array.",
+    "answerText": "Use recursion to check if each element is an array and recursively flatten it. Or use Array.flat() method. Time: O(n) where n is total elements, Space: O(depth).",
+    "difficulty": "medium",
+    "type": "coding",
+    "starterCode": "function flattenArray(arr) {\n  // Your code here\n  return [];\n}"
+  },
+  {
+    "id": "js_4",
+    "topic": "javascript",
+    "questionText": "Explain async/await and how it differs from promises.",
+    "answerText": "async/await is syntactic sugar over promises that makes asynchronous code look synchronous. async functions always return a promise. await pauses execution until the promise settles. Easier to read and debug than .then() chains. Error handling via try/catch blocks.",
+    "difficulty": "medium",
+    "type": "theory"
+  },
+  {
+    "id": "js_5",
+    "topic": "javascript",
+    "questionText": "What is the event loop in JavaScript?",
+    "answerText": "The event loop continuously checks the call stack and callback queue. When the stack is empty, it moves callbacks from the queue to the stack. Microtasks (promises, async) have higher priority than macrotasks (setTimeout, setInterval). This explains why async code executes before timeouts.",
+    "difficulty": "hard",
+    "type": "theory"
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "id": "db_1",
+    "topic": "dbms",
+    "questionText": "What is database normalization and why is it important?",
+    "answerText": "Normalization organizes data to reduce redundancy and improve integrity. Normal forms: 1NF (atomic values), 2NF (no partial dependencies), 3NF (no transitive dependencies). Prevents anomalies (insertion, update, deletion). Tradeoff: normalized databases may require more joins.",
+    "difficulty": "medium",
+    "type": "theory"
+  },
+  {
+    "id": "db_2",
+    "topic": "dbms",
+    "questionText": "Explain ACID properties.",
+    "answerText": "Atomicity: transaction all-or-nothing. Consistency: data valid before/after. Isolation: concurrent transactions don't interfere. Durability: committed data persists. Critical for data integrity.",
+    "difficulty": "medium",
+    "type": "theory"
+  },
+  {
+    "id": "db_3",
+    "topic": "dbms",
+    "questionText": "What is indexing and what are its tradeoffs?",
+    "answerText": "Indexes speed up query retrieval by creating pointers to data. Types: B-tree, hash, bitmap. Tradeoffs: faster reads but slower writes (index updates), additional storage required. Choose indexes based on query patterns.",
+    "difficulty": "medium",
+    "type": "theory"
+  },
+  {
+    "id": "db_4",
+    "topic": "dbms",
+    "questionText": "Explain the difference between SQL and NoSQL databases.",
+    "answerText": "SQL: relational, ACID compliant, structured schema, joins. NoSQL: flexible schema, horizontal scaling, eventual consistency. SQL for structured data with complex relationships, NoSQL for unstructured/semi-structured data at scale.",
+    "difficulty": "easy",
+    "type": "theory"
+  },
+  {
+    "id": "db_5",
+    "topic": "dbms",
+    "questionText": "What is database sharding?",
+    "answerText": "Sharding partitions data across multiple databases/servers based on shard key. Enables horizontal scaling and parallel processing. Challenges: maintaining referential integrity, handling hotspots, rebalancing. Most NoSQL databases have built-in sharding support.",
+    "difficulty": "hard",
+    "type": "theory"
+  }
+]
