@@ -49,6 +49,24 @@ module.exports = {
   cors: {
     origins: parseOrigins(process.env.CORS_ORIGINS),
   },
+  auth: {
+    allowPasswordAuth: process.env.ALLOW_PASSWORD_AUTH !== "false",
+    frontendUrl: process.env.FRONTEND_URL || "http://localhost:5173",
+    github: {
+      clientId: process.env.GITHUB_CLIENT_ID || "",
+      clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
+      callbackUrl:
+        process.env.GITHUB_CALLBACK_URL ||
+        "http://localhost:5173/api/auth/github/callback",
+    },
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      callbackUrl:
+        process.env.GOOGLE_CALLBACK_URL ||
+        "http://localhost:5173/api/auth/google/callback",
+    },
+  },
   ollama: {
     baseUrl: process.env.OLLAMA_BASE_URL || "http://localhost:11434",
     apiKey: process.env.OLLAMA_API_KEY || "",
