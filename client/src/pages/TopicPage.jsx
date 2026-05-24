@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { BookOpen, CheckCircle2, Code2, ClipboardList, Map } from 'lucide-react'
 import Navbar from '../components/ui/Navbar'
 import Sidebar from '../components/ui/Sidebar'
@@ -15,14 +15,22 @@ const tabs = [
 
 const TopicPage = () => {
   const { topic } = useParams()
+  const [searchParams] = useSearchParams()
   const { darkMode, sidebarOpen } = useUIStore()
-  const [activeTab, setActiveTab] = useState('theory')
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'theory')
   const [questions, setQuestions] = useState([])
   const [roadmap, setRoadmap] = useState([])
   const [progress, setProgress] = useState({})
   const [loading, setLoading] = useState(true)
 
   const title = useMemo(() => topic.replace(/_/g, ' ').toUpperCase(), [topic])
+
+  useEffect(() => {
+    const tab = searchParams.get('tab')
+    if (tab && tabs.some((item) => item.key === tab)) {
+      setActiveTab(tab)
+    }
+  }, [searchParams])
 
   useEffect(() => {
     const load = async () => {
