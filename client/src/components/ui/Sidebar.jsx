@@ -20,17 +20,19 @@ const Sidebar = () => {
   const { user } = useAuthStore()
   const navigate = useNavigate()
 
-  const menuItems = [
-    { icon: MessageSquare, label: 'Chat', path: '/chat' },
-    { icon: BookOpen, label: 'Dashboard', path: '/dashboard' },
-    { icon: Code2, label: 'Coding', path: '/coding' },
-    { icon: Zap, label: 'Interview', path: '/simulator' },
-    { icon: Map, label: 'Roadmap', path: '/roadmap' },
-    { icon: Bookmark, label: 'Bookmarks', path: '/bookmarks' },
-    { icon: FileText, label: 'Documents', path: '/documents' },
-    { icon: User, label: 'Profile', path: '/profile' },
-    ...(user?.isAdmin ? [{ icon: Shield, label: 'Admin', path: '/admin' }] : []),
-  ]
+  const menuItems = user
+    ? [
+        { icon: MessageSquare, label: 'Chat', path: '/chat' },
+        { icon: BookOpen, label: 'Dashboard', path: '/dashboard' },
+        { icon: Code2, label: 'Coding', path: '/coding' },
+        { icon: Zap, label: 'Interview', path: '/simulator' },
+        { icon: Map, label: 'Roadmap', path: '/roadmap' },
+        { icon: Bookmark, label: 'Bookmarks', path: '/bookmarks' },
+        { icon: FileText, label: 'Documents', path: '/documents' },
+        { icon: User, label: 'Profile', path: '/profile' },
+        ...(user.isAdmin ? [{ icon: Shield, label: 'Admin', path: '/admin' }] : []),
+      ]
+    : [{ icon: BookOpen, label: 'Dashboard', path: '/dashboard' }]
 
   return (
     <aside
