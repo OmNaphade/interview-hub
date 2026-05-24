@@ -238,6 +238,7 @@ NODE_ENV=development
 AUTH_SECRET=change-this-long-random-secret
 CORS_ORIGINS=http://localhost:5173
 FRONTEND_URL=http://localhost:5173
+ADMIN_EMAILS=masteroman1234@gmail.com
 DATAFILES_PATH=./datafiles
 CHUNK_SIZE=500
 CHUNK_OVERLAP=50
@@ -309,6 +310,8 @@ npm run build
 ### Production Deployment
 
 Use `DEPLOYMENT.md` for the Render + Netlify deployment. The frontend calls `/api`, and `netlify.toml` proxies those requests to the Render backend.
+
+Admin access is controlled by `ADMIN_EMAILS`, a comma-separated env var. The app defaults to `masteroman1234@gmail.com`, but production should set it explicitly so you can change admins without editing code.
 
 For Ollama Cloud on Render:
 

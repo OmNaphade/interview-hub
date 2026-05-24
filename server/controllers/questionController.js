@@ -56,7 +56,19 @@ async function getQuestion(req, res) {
   }
 }
 
+async function getRoadmapByTopic(req, res) {
+  const { topic } = req.params;
+
+  const items = await prisma.roadmapItem.findMany({
+    where: { topic },
+    orderBy: { order: "asc" },
+  });
+
+  res.json(items);
+}
+
 module.exports = {
   getQuestionsByTopic,
   getQuestion,
+  getRoadmapByTopic,
 };

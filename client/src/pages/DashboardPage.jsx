@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/ui/Navbar'
 import Sidebar from '../components/ui/Sidebar'
 import TopicCard from '../components/interview/TopicCard'
-import { questionsAPI } from '../services/api'
+import { progressAPI, questionsAPI } from '../services/api'
 
 const topics = [
   'dsa',
@@ -27,6 +27,7 @@ const DashboardPage = () => {
   const { user } = useAuthStore()
   const navigate = useNavigate()
   const [topicStats, setTopicStats] = useState({})
+  const [progressByTopic, setProgressByTopic] = useState({})
 
   const requireLogin = (path) => {
     if (user) {
@@ -55,10 +56,24 @@ const DashboardPage = () => {
         }
       }
       setTopicStats(stats)
+
+      if (user) {
+        try {
+          const progressRes = await progressAPI.getAllProgress()
+          const grouped = {}
+          progressRes.data.forEach((item) => {
+            if (!grouped[item.topic]) grouped[item.topic] = []
+            grouped[item.topic].push(item)
+          })
+          setProgressByTopic(grouped)
+        } catch (error) {
+          setProgressByTopic({})
+        }
+      }
     }
 
     loadStats()
-  }, [])
+  }, [user])
 
   return (
     <div className={`h-screen flex flex-col ${darkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
@@ -81,8 +96,8 @@ const DashboardPage = () => {
                     medium: topicStats[topic]?.medium || 0,
                     hard: topicStats[topic]?.hard || 0,
                   }}
-                  progress={45}
-                  onClick={() => requireLogin('/chat')}
+                  progress={topicProgress(progressByTopic[topic])}
+                  onClick={() => requireLogin(`/topics/${topic}`)}
                 />
               ))}
             </div>
@@ -91,6 +106,12 @@ const DashboardPage = () => {
       </div>
     </div>
   )
+}
+
+function topicProgress(items = []) {
+  const steps = ['theory', 'coding', 'interview', 'roadmap']
+  const done = steps.filter((step) => items.some((item) => item.stepName === step && item.status === 'done')).length
+  return Math.round((done / steps.length) * 100)
 }
 
 export default DashboardPage

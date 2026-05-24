@@ -108,6 +108,7 @@ DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/postgres?sslmode=require
 AUTH_SECRET=replace-with-at-least-32-random-characters
 CORS_ORIGINS=https://temporary-placeholder.netlify.app
 FRONTEND_URL=https://temporary-placeholder.netlify.app
+ADMIN_EMAILS=masteroman1234@gmail.com
 ALLOW_PASSWORD_AUTH=false
 OLLAMA_BASE_URL=https://ollama.com
 OLLAMA_API_KEY=your-real-ollama-api-key
@@ -124,6 +125,12 @@ Use `ALLOW_PASSWORD_AUTH=false` when you only want real provider-verified Google
 
 Sessions are stored in an HTTP-only cookie named `ih_token`. In production the cookie is marked `Secure`, so TLS must be active at Netlify/Render. The frontend checks `/api/auth/me` on load and treats the server cookie as the source of truth.
 
+`ADMIN_EMAILS` is a comma-separated allowlist for superadmin accounts. The app defaults to `masteroman1234@gmail.com` if the env var is missing, but production should set it explicitly so admin access can be changed without a code deploy.
+
+```env
+ADMIN_EMAILS=first@example.com,second@example.com
+```
+
 The start script runs migrations automatically:
 
 ```sh
@@ -135,6 +142,8 @@ That script runs:
 ```sh
 prisma migrate deploy && node index.js
 ```
+
+The latest migrations add password reset tokens and editable roadmap items. Confirm Render logs show `prisma migrate deploy` succeeding after this change.
 
 After Render deploys, verify:
 

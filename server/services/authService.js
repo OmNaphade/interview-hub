@@ -30,6 +30,10 @@ function hashPassword(password) {
   return `${salt}:${hash}`;
 }
 
+function hashResetToken(token) {
+  return crypto.createHash("sha256").update(token).digest("hex");
+}
+
 function verifyPassword(password, passwordHash) {
   const [salt, storedHash] = passwordHash.split(":");
   if (!salt || !storedHash) return false;
@@ -138,6 +142,7 @@ function publicUser(user) {
 module.exports = {
   COOKIE_NAME,
   hashPassword,
+  hashResetToken,
   verifyPassword,
   createToken,
   verifyToken,

@@ -1,6 +1,7 @@
 import React from 'react'
 import { useUIStore } from '../../store/uiStore'
 import { useNavigate } from 'react-router-dom'
+import { useAuthStore } from '../../store/authStore'
 import {
   MessageSquare,
   BookOpen,
@@ -9,11 +10,14 @@ import {
   Map,
   Bookmark,
   FileText,
+  Shield,
+  User,
   ChevronRight,
 } from 'lucide-react'
 
 const Sidebar = () => {
   const { darkMode, sidebarOpen } = useUIStore()
+  const { user } = useAuthStore()
   const navigate = useNavigate()
 
   const menuItems = [
@@ -24,6 +28,8 @@ const Sidebar = () => {
     { icon: Map, label: 'Roadmap', path: '/roadmap' },
     { icon: Bookmark, label: 'Bookmarks', path: '/bookmarks' },
     { icon: FileText, label: 'Documents', path: '/documents' },
+    { icon: User, label: 'Profile', path: '/profile' },
+    ...(user?.isAdmin ? [{ icon: Shield, label: 'Admin', path: '/admin' }] : []),
   ]
 
   return (

@@ -16,6 +16,10 @@ export const authAPI = {
   login: (data) => api.post('/auth/login', data),
   logout: () => api.post('/auth/logout'),
   me: () => api.get('/auth/me'),
+  updateProfile: (data) => api.put('/auth/me', data),
+  changePassword: (data) => api.put('/auth/password', data),
+  forgotPassword: (data) => api.post('/auth/password/forgot', data),
+  resetPassword: (data) => api.post('/auth/password/reset', data),
 }
 
 // ─── CHAT ENDPOINTS ───────────────────────────────────
@@ -44,6 +48,8 @@ export const questionsAPI = {
   
   getQuestion: (topic, questionId) =>
     api.get(`/questions/${topic}/${questionId}`),
+
+  getRoadmap: (topic) => api.get(`/questions/${topic}/roadmap`),
 }
 
 // ─── INTERVIEW ENDPOINTS ──────────────────────────────
@@ -96,6 +102,23 @@ export const progressAPI = {
 
 export const statusAPI = {
   ping: () => api.get('/status'),
+}
+
+export const adminAPI = {
+  dashboard: () => api.get('/admin/dashboard'),
+  getUsers: () => api.get('/admin/users'),
+  deleteUser: (userId) => api.delete(`/admin/users/${userId}`),
+  getProgress: (params = {}) => api.get('/admin/progress', { params }),
+  deleteProgress: (progressId) => api.delete(`/admin/progress/${progressId}`),
+  clearUserProgress: (userId) => api.delete(`/admin/users/${userId}/progress`),
+  getQuestions: (params = {}) => api.get('/admin/questions', { params }),
+  createQuestion: (data) => api.post('/admin/questions', data),
+  updateQuestion: (questionId, data) => api.put(`/admin/questions/${questionId}`, data),
+  deleteQuestion: (questionId) => api.delete(`/admin/questions/${questionId}`),
+  getRoadmap: (params = {}) => api.get('/admin/roadmap', { params }),
+  createRoadmapItem: (data) => api.post('/admin/roadmap', data),
+  updateRoadmapItem: (itemId, data) => api.put(`/admin/roadmap/${itemId}`, data),
+  deleteRoadmapItem: (itemId) => api.delete(`/admin/roadmap/${itemId}`),
 }
 
 // ─── STREAMING (SSE) ──────────────────────────────────

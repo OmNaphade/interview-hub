@@ -11,6 +11,7 @@ For the exact split deployment steps, use `DEPLOYMENT.md`.
 - Set `DATABASE_URL` to the production PostgreSQL/pgvector database.
 - Set `CORS_ORIGINS` to the exact frontend origin, for example `https://app.example.com`.
 - Set `FRONTEND_URL` to the exact frontend origin so OAuth redirects return to the public app.
+- Set `ADMIN_EMAILS` to the comma-separated list of superadmin accounts. The app has a development default, but production should be explicit.
 - Set `TRUST_PROXY=true` when running behind a reverse proxy or platform load balancer.
 - Point `OLLAMA_BASE_URL` to the production Ollama host. For Ollama Cloud direct API access, use `https://ollama.com`, not `/api/chat`.
 - Set `OLLAMA_API_KEY`, `CHAT_MODEL`, and `EMBED_MODEL` to real production values.
@@ -18,6 +19,7 @@ For the exact split deployment steps, use `DEPLOYMENT.md`.
 ## Runtime
 
 - Run database migrations before deploying the server.
+- Confirm migrations include `PasswordResetToken` and `RoadmapItem`.
 - Serve the Vite `client/dist` build from a static host or reverse proxy.
 - Route frontend `/api/*` requests to the Node server. The current Netlify setup does this in `netlify.toml`.
 - Terminate TLS at the proxy/platform so secure cookies work.

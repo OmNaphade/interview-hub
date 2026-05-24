@@ -16,6 +16,9 @@ const LoginPage = () => {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [resetMode, setResetMode] = useState(false)
+  const [resetToken, setResetToken] = useState('')
+  const [resetMessage, setResetMessage] = useState('')
   const [authConfig, setAuthConfig] = useState({
     passwordAuth: true,
     github: false,
@@ -63,6 +66,30 @@ const LoginPage = () => {
     }
   }
 
+  const submitReset = async (event) => {
+    event.preventDefault()
+    setError('')
+    setResetMessage('')
+    setLoading(true)
+
+    try {
+      if (resetToken) {
+        await authAPI.resetPassword({ token: resetToken, newPassword: password })
+        setResetMode(false)
+        setResetToken('')
+        setPassword('')
+        setResetMessage('Password reset complete. You can log in now.')
+      } else {
+        const res = await authAPI.forgotPassword({ email })
+        setResetMessage(res.data.resetToken ? `Reset token: ${res.data.resetToken}` : res.data.message)
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || 'Password reset failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const startOAuth = (provider) => {
     window.location.href = `/api/auth/${provider}?returnTo=${encodeURIComponent(returnTo)}`
   }
@@ -88,8 +115,8 @@ const LoginPage = () => {
           }`}
         >
           {authConfig.passwordAuth && (
-            <form onSubmit={submit}>
-              <div className="mb-6 grid grid-cols-2 rounded border border-gray-700 p-1">
+            <form onSubmit={resetMode ? submitReset : submit}>
+              {!resetMode && <div className="mb-6 grid grid-cols-2 rounded border border-gray-700 p-1">
                 <button
                   type="button"
                   onClick={() => setMode('login')}
@@ -110,9 +137,9 @@ const LoginPage = () => {
                   <UserPlus size={16} />
                   Sign up
                 </button>
-              </div>
+              </div>}
 
-              {mode === 'signup' && (
+              {mode === 'signup' && !resetMode && (
                 <label className="mb-4 block">
                   <span className="mb-2 block text-sm font-medium">Name</span>
                   <input
@@ -136,7 +163,19 @@ const LoginPage = () => {
                 />
               </label>
 
-              <label className="mb-4 block">
+              {resetMode && (
+                <label className="mb-4 block">
+                  <span className="mb-2 block text-sm font-medium">Reset token</span>
+                  <input
+                    value={resetToken}
+                    onChange={(event) => setResetToken(event.target.value)}
+                    className="w-full rounded border border-gray-700 bg-transparent px-3 py-2 outline-none focus:border-blue-500"
+                    placeholder="Paste token after requesting reset"
+                  />
+                </label>
+              )}
+
+              {(!resetMode || resetToken) && <label className="mb-4 block">
                 <span className="mb-2 block text-sm font-medium">Password</span>
                 <input
                   type="password"
@@ -147,16 +186,28 @@ const LoginPage = () => {
                   minLength={8}
                   required
                 />
-              </label>
+              </label>}
 
               {error && <p className="mb-4 rounded bg-red-500/10 px-3 py-2 text-sm text-red-500">{error}</p>}
+              {resetMessage && <p className="mb-4 rounded bg-green-500/10 px-3 py-2 text-sm text-green-500">{resetMessage}</p>}
 
               <button
                 type="submit"
                 disabled={loading}
                 className="w-full rounded bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-60"
               >
-                {loading ? 'Please wait...' : mode === 'signup' ? 'Create Account' : 'Login'}
+                {loading ? 'Please wait...' : resetMode ? (resetToken ? 'Reset Password' : 'Send Reset Link') : mode === 'signup' ? 'Create Account' : 'Login'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setResetMode((current) => !current)
+                  setError('')
+                  setResetMessage('')
+                }}
+                className="mt-3 w-full rounded px-4 py-2 text-sm text-blue-500 hover:bg-blue-500/10"
+              >
+                {resetMode ? 'Back to login' : 'Forgot password?'}
               </button>
             </form>
           )}

@@ -3,7 +3,7 @@ import { useUIStore } from '../../store/uiStore'
 import { useAuthStore } from '../../store/authStore'
 import { authAPI, statusAPI } from '../../services/api'
 import { useNavigate } from 'react-router-dom'
-import { LogIn, LogOut, Menu, Moon, Sun } from 'lucide-react'
+import { LogIn, LogOut, Menu, Moon, Sun, User } from 'lucide-react'
 
 const Navbar = () => {
   const { darkMode, toggleDarkMode, toggleSidebar } = useUIStore()
@@ -72,14 +72,23 @@ const Navbar = () => {
           </button>
 
           {user ? (
-            <button
-              onClick={logout}
-              className="flex items-center gap-2 rounded px-3 py-2 text-sm hover:bg-gray-700"
-              title="Logout"
-            >
-              <span className="hidden sm:inline">{user.name || user.email}</span>
-              <LogOut size={18} />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => navigate('/profile')}
+                className="flex items-center gap-2 rounded px-3 py-2 text-sm hover:bg-gray-700"
+                title="Profile"
+              >
+                <span className="hidden sm:inline">{user.name || user.email}</span>
+                <User size={18} />
+              </button>
+              <button
+                onClick={logout}
+                className="flex items-center gap-2 rounded px-3 py-2 text-sm hover:bg-gray-700"
+                title="Logout"
+              >
+                <LogOut size={18} />
+              </button>
+            </div>
           ) : (
             <button
               onClick={() => navigate('/login')}

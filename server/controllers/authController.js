@@ -3,6 +3,7 @@ const crypto = require("crypto");
 const config = require("../config");
 const {
   hashPassword,
+  hashResetToken,
   verifyPassword,
   createToken,
   setAuthCookie,
@@ -28,6 +29,17 @@ function normalizeEmail(email) {
 
 function validatePassword(password) {
   return typeof password === "string" && password.length >= 8;
+}
+
+function adminFlag(user) {
+  return config.auth.adminEmails.includes(String(user.email || "").toLowerCase());
+}
+
+function publicUserWithRole(user) {
+  return {
+    ...publicUser(user),
+    isAdmin: adminFlag(user),
+  };
 }
 
 async function signup(req, res) {
@@ -63,7 +75,7 @@ async function signup(req, res) {
   const token = createToken(user);
   setAuthCookie(res, token);
 
-  res.status(201).json({ user: publicUser(user) });
+  res.status(201).json({ user: publicUserWithRole(user) });
 }
 
 async function login(req, res) {
@@ -82,7 +94,7 @@ async function login(req, res) {
   const token = createToken(user);
   setAuthCookie(res, token);
 
-  res.json({ user: publicUser(user) });
+  res.json({ user: publicUserWithRole(user) });
 }
 
 async function logout(req, res) {
@@ -92,7 +104,97 @@ async function logout(req, res) {
 
 async function me(req, res) {
   setAuthCookie(res, createToken(req.user));
-  res.json({ user: req.user });
+  res.json({ user: publicUserWithRole(req.user) });
+}
+
+async function updateProfile(req, res) {
+  const name = String(req.body.name || "").trim() || null;
+
+  const user = await prisma.user.update({
+    where: { id: req.user.id },
+    data: { name },
+  });
+
+  res.json({ user: publicUserWithRole(user) });
+}
+
+async function changePassword(req, res) {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!validatePassword(newPassword)) {
+    return res.status(400).json({ error: "New password must be at least 8 characters" });
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+  if (!user || !verifyPassword(currentPassword || "", user.passwordHash)) {
+    return res.status(401).json({ error: "Current password is incorrect" });
+  }
+
+  await prisma.user.update({
+    where: { id: req.user.id },
+    data: { passwordHash: hashPassword(newPassword) },
+  });
+
+  res.json({ message: "Password changed" });
+}
+
+async function requestPasswordReset(req, res) {
+  const email = normalizeEmail(req.body.email);
+  const user = await prisma.user.findUnique({ where: { email } });
+
+  let resetToken = null;
+  if (user) {
+    resetToken = crypto.randomBytes(32).toString("base64url");
+    await prisma.passwordResetToken.create({
+      data: {
+        userId: user.id,
+        tokenHash: hashResetToken(resetToken),
+        expiresAt: new Date(Date.now() + 30 * 60 * 1000),
+      },
+    });
+  }
+
+  const response = {
+    message: "If an account exists, a password reset link will be sent.",
+  };
+
+  if (!config.isProduction && resetToken) {
+    response.resetToken = resetToken;
+  }
+
+  res.json(response);
+}
+
+async function resetPassword(req, res) {
+  const { token, newPassword } = req.body;
+
+  if (!token) {
+    return res.status(400).json({ error: "Reset token is required" });
+  }
+
+  if (!validatePassword(newPassword)) {
+    return res.status(400).json({ error: "New password must be at least 8 characters" });
+  }
+
+  const record = await prisma.passwordResetToken.findUnique({
+    where: { tokenHash: hashResetToken(token) },
+  });
+
+  if (!record || record.usedAt || record.expiresAt < new Date()) {
+    return res.status(400).json({ error: "Reset token is invalid or expired" });
+  }
+
+  await prisma.user.update({
+    where: { id: record.userId },
+    data: { passwordHash: hashPassword(newPassword) },
+  });
+
+  await prisma.passwordResetToken.update({
+    where: { id: record.id },
+    data: { usedAt: new Date() },
+  });
+
+  res.json({ message: "Password reset complete" });
 }
 
 function redirectAfterOAuth(req, res, success = true) {
@@ -183,6 +285,7 @@ function authConfig(req, res) {
     passwordAuth: config.auth.allowPasswordAuth,
     github: Boolean(config.auth.github.clientId && config.auth.github.clientSecret),
     google: Boolean(config.auth.google.clientId && config.auth.google.clientSecret),
+    adminEmails: config.isProduction ? undefined : config.auth.adminEmails,
   });
 }
 
@@ -193,6 +296,10 @@ module.exports = {
   login,
   logout,
   me,
+  updateProfile,
+  changePassword,
+  requestPasswordReset,
+  resetPassword,
   signup,
   startGithub,
   startGoogle,

@@ -10,6 +10,9 @@ import ChatPage from './pages/ChatPage'
 import DashboardPage from './pages/DashboardPage'
 import LoginPage from './pages/LoginPage'
 import PlaceholderPage from './pages/PlaceholderPage'
+import TopicPage from './pages/TopicPage'
+import ProfilePage from './pages/ProfilePage'
+import AdminPage from './pages/AdminPage'
 
 import './index.css'
 
@@ -23,6 +26,25 @@ const ProtectedRoute = ({ children }) => {
 
   if (!user) {
     return <Navigate to="/login" replace state={{ from: location }} />
+  }
+
+  return children
+}
+
+const AdminRoute = ({ children }) => {
+  const location = useLocation()
+  const { user, checked } = useAuthStore()
+
+  if (!checked) {
+    return <div className="min-h-screen bg-gray-950" />
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace state={{ from: location }} />
+  }
+
+  if (!user.isAdmin) {
+    return <Navigate to="/dashboard" replace />
   }
 
   return children
@@ -68,6 +90,9 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/topics/:topic" element={<ProtectedRoute><TopicPage /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+          <Route path="/admin" element={<AdminRoute><AdminPage /></AdminRoute>} />
           <Route path="/coding" element={<ProtectedRoute><PlaceholderPage title="Coding Challenges" /></ProtectedRoute>} />
           <Route path="/simulator" element={<ProtectedRoute><PlaceholderPage title="Mock Interview" /></ProtectedRoute>} />
           <Route path="/roadmap" element={<ProtectedRoute><PlaceholderPage title="Study Roadmap" /></ProtectedRoute>} />

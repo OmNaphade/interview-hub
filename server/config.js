@@ -22,6 +22,13 @@ function parseOrigins(value) {
     .filter(Boolean);
 }
 
+function parseList(value) {
+  return String(value || "")
+    .split(",")
+    .map((item) => item.trim().toLowerCase())
+    .filter(Boolean);
+}
+
 function validateProductionEnv() {
   if (!isProduction) return;
 
@@ -51,6 +58,7 @@ module.exports = {
   },
   auth: {
     allowPasswordAuth: process.env.ALLOW_PASSWORD_AUTH !== "false",
+    adminEmails: parseList(process.env.ADMIN_EMAILS || "masteroman1234@gmail.com"),
     frontendUrl: process.env.FRONTEND_URL || "http://localhost:5173",
     github: {
       clientId: process.env.GITHUB_CLIENT_ID || "",

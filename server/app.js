@@ -13,6 +13,7 @@ const documentRoutes = require("./routes/documents");
 const progressRoutes = require("./routes/progress");
 const statusRoutes = require("./routes/status");
 const authRoutes = require("./routes/auth");
+const adminRoutes = require("./routes/admin");
 
 function createApp() {
   const app = express();
@@ -86,6 +87,7 @@ function createApp() {
   app.use("/api/documents", documentRoutes);
   app.use("/api/progress", progressRoutes);
   app.use("/api/status", statusRoutes);
+  app.use("/api/admin", adminRoutes);
 
   app.use((req, res) => {
     res.status(404).json({ error: "Route not found" });

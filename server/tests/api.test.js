@@ -11,6 +11,10 @@ const test = require("node:test");
 const users = new Map();
 const sessions = new Map();
 const messages = new Map();
+const resetTokens = new Map();
+const questions = new Map();
+const roadmapItems = new Map();
+const progressItems = new Map();
 
 function publicUser(user) {
   return {
@@ -25,6 +29,10 @@ function resetData() {
   users.clear();
   sessions.clear();
   messages.clear();
+  resetTokens.clear();
+  questions.clear();
+  roadmapItems.clear();
+  progressItems.clear();
 }
 
 function sessionWithMessages(session, order = "asc", take = undefined) {
@@ -59,6 +67,9 @@ const prisma = {
           .map(([key]) => [key, user[key]])
       );
     },
+    async findMany() {
+      return [...users.values()].sort((a, b) => b.createdAt - a.createdAt);
+    },
     async create({ data }) {
       const user = {
         id: crypto.randomUUID(),
@@ -71,13 +82,143 @@ const prisma = {
       users.set(user.id, user);
       return user;
     },
+    async update({ where, data }) {
+      const user = users.get(where.id);
+      if (!user) throw new Error("User not found");
+      const updated = { ...user, ...data, updatedAt: new Date() };
+      users.set(where.id, updated);
+      return updated;
+    },
+    async delete({ where }) {
+      const user = users.get(where.id);
+      if (!user) throw new Error("User not found");
+      users.delete(where.id);
+      return user;
+    },
   },
   question: {
-    async findMany() {
-      return [];
+    async findMany({ where = {} } = {}) {
+      return [...questions.values()].filter((question) => {
+        if (where.topic && question.topic !== where.topic) return false;
+        if (where.difficulty && question.difficulty !== where.difficulty) return false;
+        if (where.type && question.type !== where.type) return false;
+        return true;
+      });
     },
-    async findFirst() {
-      return null;
+    async findFirst({ where }) {
+      return [...questions.values()].find(
+        (question) => question.id === where.id && question.topic === where.topic
+      ) || null;
+    },
+    async create({ data }) {
+      const question = { id: crypto.randomUUID(), createdAt: new Date(), ...data };
+      questions.set(question.id, question);
+      return question;
+    },
+    async update({ where, data }) {
+      const question = questions.get(where.id);
+      if (!question) throw new Error("Question not found");
+      const updated = { ...question, ...data };
+      questions.set(where.id, updated);
+      return updated;
+    },
+    async delete({ where }) {
+      const question = questions.get(where.id);
+      if (!question) throw new Error("Question not found");
+      questions.delete(where.id);
+      return question;
+    },
+  },
+  passwordResetToken: {
+    async create({ data }) {
+      const record = { id: crypto.randomUUID(), createdAt: new Date(), usedAt: null, ...data };
+      resetTokens.set(record.tokenHash, record);
+      return record;
+    },
+    async findUnique({ where }) {
+      if (where.tokenHash) return resetTokens.get(where.tokenHash) || null;
+      return [...resetTokens.values()].find((item) => item.id === where.id) || null;
+    },
+    async update({ where, data }) {
+      const record = [...resetTokens.values()].find((item) => item.id === where.id);
+      if (!record) throw new Error("Reset token not found");
+      const updated = { ...record, ...data };
+      resetTokens.delete(record.tokenHash);
+      resetTokens.set(updated.tokenHash, updated);
+      return updated;
+    },
+  },
+  roadmapItem: {
+    async findMany({ where = {} } = {}) {
+      return [...roadmapItems.values()]
+        .filter((item) => !where.topic || item.topic === where.topic)
+        .sort((a, b) => a.order - b.order);
+    },
+    async create({ data }) {
+      const item = { id: crypto.randomUUID(), createdAt: new Date(), updatedAt: new Date(), ...data };
+      roadmapItems.set(item.id, item);
+      return item;
+    },
+    async update({ where, data }) {
+      const item = roadmapItems.get(where.id);
+      if (!item) throw new Error("Roadmap item not found");
+      const updated = { ...item, ...data, updatedAt: new Date() };
+      roadmapItems.set(where.id, updated);
+      return updated;
+    },
+    async delete({ where }) {
+      const item = roadmapItems.get(where.id);
+      if (!item) throw new Error("Roadmap item not found");
+      roadmapItems.delete(where.id);
+      return item;
+    },
+  },
+  topicProgress: {
+    async findMany({ where = {} } = {}) {
+      return [...progressItems.values()]
+        .filter((item) => {
+          if (where.userId && item.userId !== where.userId) return false;
+          if (where.topic && item.topic !== where.topic) return false;
+          return true;
+        })
+        .map((item) => ({
+          ...item,
+          user: users.get(item.userId)
+            ? {
+                id: item.userId,
+                email: users.get(item.userId).email,
+                name: users.get(item.userId).name,
+              }
+            : undefined,
+        }));
+    },
+    async upsert({ where, update, create }) {
+      const key = `${where.userId_topic_stepName.userId}:${where.userId_topic_stepName.topic}:${where.userId_topic_stepName.stepName}`;
+      const existing = [...progressItems.values()].find(
+        (item) => `${item.userId}:${item.topic}:${item.stepName}` === key
+      );
+      if (existing) {
+        const updated = { ...existing, ...update, updatedAt: new Date() };
+        progressItems.set(updated.id, updated);
+        return updated;
+      }
+      const item = { id: crypto.randomUUID(), updatedAt: new Date(), ...create };
+      progressItems.set(item.id, item);
+      return item;
+    },
+    async delete({ where }) {
+      const item = progressItems.get(where.id);
+      if (!item) throw new Error("Progress not found");
+      progressItems.delete(where.id);
+      return item;
+    },
+    async deleteMany({ where }) {
+      const targets = [...progressItems.values()].filter((item) => item.userId === where.userId);
+      targets.forEach((item) => progressItems.delete(item.id));
+      return { count: targets.length };
+    },
+    async count() {
+      return progressItems.size;
     },
   },
   chatSession: {
@@ -130,11 +271,32 @@ const prisma = {
       return message;
     },
   },
+  document: {
+    async count() {
+      return 0;
+    },
+  },
+  interviewSession: {
+    async count() {
+      return 0;
+    },
+  },
   async $queryRaw() {
     return [{ "?column?": 1 }];
   },
   async $disconnect() {},
 };
+
+for (const modelName of ["user", "question", "roadmapItem", "chatSession"]) {
+  const model = prisma[modelName];
+  model.count = async () => {
+    if (modelName === "user") return users.size;
+    if (modelName === "question") return questions.size;
+    if (modelName === "roadmapItem") return roadmapItems.size;
+    if (modelName === "chatSession") return sessions.size;
+    return 0;
+  };
+}
 
 require.cache[require.resolve("../prisma/client")] = {
   id: require.resolve("../prisma/client"),
@@ -237,6 +399,7 @@ test("password auth creates a secure cookie-backed session", async () => {
 
     assert.equal(result.response.status, 201);
     assert.equal(result.body.user.email, "user@example.com");
+    assert.equal(result.body.user.isAdmin, false);
 
     const signupCookie = cookieFrom(result.response);
     assert.match(signupCookie, /^ih_token=/);
@@ -285,6 +448,63 @@ test("password auth creates a secure cookie-backed session", async () => {
   });
 });
 
+test("profile update, password change, and password reset work", async () => {
+  resetData();
+
+  await withServer(async (baseUrl) => {
+    let result = await request(baseUrl, "/api/auth/signup", {
+      method: "POST",
+      body: JSON.stringify({
+        email: "profile@example.com",
+        name: "Old",
+        password: "password123",
+      }),
+    });
+    const cookie = cookieFrom(result.response);
+
+    result = await request(baseUrl, "/api/auth/me", {
+      method: "PUT",
+      headers: { Cookie: cookie },
+      body: JSON.stringify({ name: "New Name" }),
+    });
+    assert.equal(result.response.status, 200);
+    assert.equal(result.body.user.name, "New Name");
+
+    result = await request(baseUrl, "/api/auth/password", {
+      method: "PUT",
+      headers: { Cookie: cookie },
+      body: JSON.stringify({ currentPassword: "wrong", newPassword: "newpassword123" }),
+    });
+    assert.equal(result.response.status, 401);
+
+    result = await request(baseUrl, "/api/auth/password", {
+      method: "PUT",
+      headers: { Cookie: cookie },
+      body: JSON.stringify({ currentPassword: "password123", newPassword: "newpassword123" }),
+    });
+    assert.equal(result.response.status, 200);
+
+    result = await request(baseUrl, "/api/auth/password/forgot", {
+      method: "POST",
+      body: JSON.stringify({ email: "profile@example.com" }),
+    });
+    assert.equal(result.response.status, 200);
+    assert.equal(Boolean(result.body.resetToken), true);
+
+    result = await request(baseUrl, "/api/auth/password/reset", {
+      method: "POST",
+      body: JSON.stringify({ token: result.body.resetToken, newPassword: "resetpassword123" }),
+    });
+    assert.equal(result.response.status, 200);
+
+    result = await request(baseUrl, "/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email: "profile@example.com", password: "resetpassword123" }),
+    });
+    assert.equal(result.response.status, 200);
+  });
+});
+
 test("protected API groups require authentication", async () => {
   resetData();
 
@@ -302,6 +522,138 @@ test("protected API groups require authentication", async () => {
       assert.equal(result.response.status, 401, path);
       assert.equal(result.body.error, "Authentication required");
     }
+  });
+});
+
+test("admin APIs are restricted and allow content management for configured admins", async () => {
+  resetData();
+
+  await withServer(async (baseUrl) => {
+    let result = await request(baseUrl, "/api/auth/signup", {
+      method: "POST",
+      body: JSON.stringify({
+        email: "normal@example.com",
+        password: "password123",
+      }),
+    });
+    const normalCookie = cookieFrom(result.response);
+
+    result = await request(baseUrl, "/api/admin/questions", {
+      method: "POST",
+      headers: { Cookie: normalCookie },
+      body: JSON.stringify({
+        topic: "dsa",
+        type: "theory",
+        difficulty: "easy",
+        questionText: "What is a stack?",
+        answerText: "LIFO",
+      }),
+    });
+    assert.equal(result.response.status, 403);
+
+    result = await request(baseUrl, "/api/auth/signup", {
+      method: "POST",
+      body: JSON.stringify({
+        email: "masteroman1234@gmail.com",
+        password: "password123",
+      }),
+    });
+    const adminCookie = cookieFrom(result.response);
+    assert.equal(result.body.user.isAdmin, true);
+
+    result = await request(baseUrl, "/api/progress/dsa/theory", {
+      method: "PUT",
+      headers: { Cookie: normalCookie },
+      body: JSON.stringify({ status: "done" }),
+    });
+    assert.equal(result.response.status, 200);
+    const progressId = result.body.id;
+
+    result = await request(baseUrl, "/api/admin/dashboard", {
+      headers: { Cookie: adminCookie },
+    });
+    assert.equal(result.response.status, 200);
+    assert.equal(result.body.counts.users, 2);
+    assert.equal(result.body.counts.progressItems, 1);
+
+    result = await request(baseUrl, "/api/admin/users", {
+      headers: { Cookie: adminCookie },
+    });
+    assert.equal(result.response.status, 200);
+    assert.equal(result.body.length, 2);
+
+    result = await request(baseUrl, "/api/admin/progress", {
+      headers: { Cookie: adminCookie },
+    });
+    assert.equal(result.response.status, 200);
+    assert.equal(result.body[0].id, progressId);
+
+    result = await request(baseUrl, `/api/admin/progress/${progressId}`, {
+      method: "DELETE",
+      headers: { Cookie: adminCookie },
+    });
+    assert.equal(result.response.status, 200);
+
+    result = await request(baseUrl, "/api/progress/dsa/coding", {
+      method: "PUT",
+      headers: { Cookie: normalCookie },
+      body: JSON.stringify({ status: "done" }),
+    });
+    assert.equal(result.response.status, 200);
+
+    result = await request(baseUrl, `/api/admin/users/${users.values().next().value.id}/progress`, {
+      method: "DELETE",
+      headers: { Cookie: adminCookie },
+    });
+    assert.equal(result.response.status, 200);
+
+    result = await request(baseUrl, "/api/admin/questions", {
+      method: "POST",
+      headers: { Cookie: adminCookie },
+      body: JSON.stringify({
+        topic: "dsa",
+        type: "coding",
+        difficulty: "medium",
+        questionText: "Reverse an array",
+        answerText: "Use two pointers",
+        starterCode: "function reverse(items) {}",
+      }),
+    });
+    assert.equal(result.response.status, 201);
+    const questionId = result.body.id;
+
+    result = await request(baseUrl, "/api/admin/questions", {
+      headers: { Cookie: adminCookie },
+    });
+    assert.equal(result.response.status, 200);
+    assert.equal(result.body.some((question) => question.id === questionId), true);
+
+    result = await request(baseUrl, "/api/questions/dsa?type=coding");
+    assert.equal(result.response.status, 200);
+    assert.equal(result.body.some((question) => question.id === questionId), true);
+
+    result = await request(baseUrl, "/api/admin/roadmap", {
+      method: "POST",
+      headers: { Cookie: adminCookie },
+      body: JSON.stringify({
+        topic: "dsa",
+        title: "Arrays",
+        description: "Start with traversal and two pointers.",
+        order: 1,
+      }),
+    });
+    assert.equal(result.response.status, 201);
+
+    result = await request(baseUrl, "/api/questions/dsa/roadmap");
+    assert.equal(result.response.status, 200);
+    assert.equal(result.body[0].title, "Arrays");
+
+    const roadmapId = result.body[0].id;
+    result = await request(baseUrl, `/api/admin/roadmap/${roadmapId}`, {
+      method: "DELETE",
+      headers: { Cookie: adminCookie },
+    });
+    assert.equal(result.response.status, 200);
   });
 });
 

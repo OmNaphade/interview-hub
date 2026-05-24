@@ -23,6 +23,21 @@ model User {
   bookmarks    Bookmark[]
   progress     TopicProgress[]
   interviews   InterviewSession[]
+  resetTokens  PasswordResetToken[]
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 model Document {
@@ -115,6 +130,19 @@ model Question {
   @@index([topic])
   @@index([difficulty])
   @@index([type])
+}
+
+model RoadmapItem {
+  id          String   @id @default(uuid())
+  topic       String
+  title       String
+  description String   @db.Text
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([topic])
+  @@index([order])
 }
 
 model Bookmark {
