@@ -5,13 +5,13 @@
 
 [[redirects]]
   from = "/api/*"
-  to = "https://REPLACE_WITH_BACKEND_DOMAIN/api/:splat"
+  to = "https://interview-hub-nhmc.onrender.com/api/:splat"
   status = 200
   force = true
 
 [[redirects]]
   from = "/health"
-  to = "https://REPLACE_WITH_BACKEND_DOMAIN/health"
+  to = "https://interview-hub-nhmc.onrender.com/health"
   status = 200
   force = true
 
