@@ -2,6 +2,7 @@ const crypto = require("crypto");
 const config = require("../config");
 
 const STATE_COOKIE = "ih_oauth_state";
+const RETURN_TO_COOKIE = "ih_oauth_return_to";
 
 function createState() {
   return crypto.randomBytes(24).toString("base64url");
@@ -19,6 +20,38 @@ function setStateCookie(res, state) {
 
 function clearStateCookie(res) {
   res.clearCookie(STATE_COOKIE, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: config.isProduction,
+    path: "/",
+  });
+}
+
+function safeReturnTo(value) {
+  const returnTo = String(value || "").trim();
+  if (!returnTo || !returnTo.startsWith("/") || returnTo.startsWith("//")) {
+    return "/dashboard";
+  }
+
+  return returnTo;
+}
+
+function setReturnToCookie(res, returnTo) {
+  res.cookie(RETURN_TO_COOKIE, safeReturnTo(returnTo), {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: config.isProduction,
+    maxAge: 10 * 60 * 1000,
+    path: "/",
+  });
+}
+
+function getReturnTo(req) {
+  return safeReturnTo(parseCookies(req)[RETURN_TO_COOKIE]);
+}
+
+function clearReturnToCookie(res) {
+  res.clearCookie(RETURN_TO_COOKIE, {
     httpOnly: true,
     sameSite: "lax",
     secure: config.isProduction,
@@ -153,10 +186,13 @@ async function getGoogleProfile(code) {
 
 module.exports = {
   clearStateCookie,
+  clearReturnToCookie,
   githubAuthUrl,
+  getReturnTo,
   getGithubProfile,
   googleAuthUrl,
   getGoogleProfile,
   setStateCookie,
+  setReturnToCookie,
   verifyState,
 };

@@ -11,11 +11,14 @@ const {
 } = require("../services/authService");
 const {
   clearStateCookie,
+  clearReturnToCookie,
   githubAuthUrl,
+  getReturnTo,
   getGithubProfile,
   googleAuthUrl,
   getGoogleProfile,
   setStateCookie,
+  setReturnToCookie,
   verifyState,
 } = require("../services/oauthService");
 
@@ -88,13 +91,15 @@ async function logout(req, res) {
 }
 
 async function me(req, res) {
+  setAuthCookie(res, createToken(req.user));
   res.json({ user: req.user });
 }
 
-function redirectAfterOAuth(res, success = true) {
+function redirectAfterOAuth(req, res, success = true) {
   const target = new URL(config.auth.frontendUrl);
-  target.pathname = success ? "/dashboard" : "/login";
+  target.pathname = success ? getReturnTo(req) : "/login";
   if (!success) target.searchParams.set("error", "oauth_failed");
+  clearReturnToCookie(res);
   res.redirect(target.toString());
 }
 
@@ -118,6 +123,7 @@ function startGithub(req, res) {
 
   const auth = githubAuthUrl();
   setStateCookie(res, auth.state);
+  setReturnToCookie(res, req.query.returnTo);
   res.redirect(auth.url);
 }
 
@@ -133,11 +139,11 @@ async function githubCallback(req, res) {
 
     clearStateCookie(res);
     setAuthCookie(res, token);
-    redirectAfterOAuth(res);
+    redirectAfterOAuth(req, res);
   } catch (error) {
     console.error("GitHub OAuth error:", error);
     clearStateCookie(res);
-    redirectAfterOAuth(res, false);
+    redirectAfterOAuth(req, res, false);
   }
 }
 
@@ -148,6 +154,7 @@ function startGoogle(req, res) {
 
   const auth = googleAuthUrl();
   setStateCookie(res, auth.state);
+  setReturnToCookie(res, req.query.returnTo);
   res.redirect(auth.url);
 }
 
@@ -163,11 +170,11 @@ async function googleCallback(req, res) {
 
     clearStateCookie(res);
     setAuthCookie(res, token);
-    redirectAfterOAuth(res);
+    redirectAfterOAuth(req, res);
   } catch (error) {
     console.error("Google OAuth error:", error);
     clearStateCookie(res);
-    redirectAfterOAuth(res, false);
+    redirectAfterOAuth(req, res, false);
   }
 }
 

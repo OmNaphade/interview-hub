@@ -110,8 +110,8 @@ CORS_ORIGINS=https://temporary-placeholder.netlify.app
 FRONTEND_URL=https://temporary-placeholder.netlify.app
 ALLOW_PASSWORD_AUTH=false
 OLLAMA_BASE_URL=https://ollama.com
-OLLAMA_API_KEY=your_ollama_api_key
-CHAT_MODEL=your_ollama_cloud_chat_model
+OLLAMA_API_KEY=your-real-ollama-api-key
+CHAT_MODEL=glm-5.1
 EMBED_MODEL=nomic-embed-text
 DATAFILES_PATH=./datafiles
 CHUNK_SIZE=500
@@ -121,6 +121,8 @@ TOP_K_CHUNKS=5
 
 `CORS_ORIGINS` can temporarily use a placeholder until Netlify gives you the real frontend URL. Update it after Netlify deployment.
 Use `ALLOW_PASSWORD_AUTH=false` when you only want real provider-verified Google/GitHub logins.
+
+Sessions are stored in an HTTP-only cookie named `ih_token`. In production the cookie is marked `Secure`, so TLS must be active at Netlify/Render. The frontend checks `/api/auth/me` on load and treats the server cookie as the source of truth.
 
 The start script runs migrations automatically:
 
@@ -149,12 +151,12 @@ https://interview-hub-nhmc.onrender.com
 
 ## 4. Ollama Cloud
 
-Create an Ollama API key and set these Render env vars:
+Create an Ollama API key and set these Render env vars. For Ollama Cloud direct API access, keep the base URL at `https://ollama.com`; the backend appends `/api/chat`, `/api/embed`, and `/api/tags` itself.
 
 ```env
 OLLAMA_BASE_URL=https://ollama.com
-OLLAMA_API_KEY=your_ollama_api_key
-CHAT_MODEL=your_ollama_cloud_chat_model
+OLLAMA_API_KEY=your-real-ollama-api-key
+CHAT_MODEL=glm-5.1
 EMBED_MODEL=nomic-embed-text
 ```
 
@@ -328,6 +330,16 @@ dashboard
 chat
 status
 document upload/search if used
+```
+
+Run local release checks before pushing:
+
+```sh
+cd server
+npm test
+
+cd ../client
+npm run build
 ```
 
 Direct backend checks:

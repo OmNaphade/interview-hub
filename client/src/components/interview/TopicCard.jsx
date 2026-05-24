@@ -1,9 +1,13 @@
 import React from 'react'
 import { Zap, Code2, Users, FileText } from 'lucide-react'
 
-const TopicCard = ({ topic, questionCount, difficulty, progress }) => {
+const TopicCard = ({ topic, questionCount, difficulty, progress, onClick }) => {
   return (
-    <div className="bg-gradient-to-br from-purple-500 to-blue-600 p-6 rounded-lg text-white shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
+    <button
+      type="button"
+      onClick={onClick}
+      className="w-full bg-gradient-to-br from-purple-500 to-blue-600 p-6 rounded-lg text-left text-white shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
+    >
       <div className="flex items-start justify-between mb-4">
         <div>
           <h3 className="text-xl font-bold">{topic}</h3>
@@ -50,7 +54,7 @@ const TopicCard = ({ topic, questionCount, difficulty, progress }) => {
           📄 From Docs
         </div>
       )}
-    </div>
+    </button>
   )
 }
 

@@ -1,6 +1,6 @@
 # Interview Hub - AI-Powered Interview Preparation
 
-A full-stack interview preparation & AI assistant web application powered entirely by local Ollama models. No external APIs required!
+A full-stack interview preparation & AI assistant web application powered by Ollama locally or by an Ollama-compatible cloud host in production.
 
 ## Features
 
@@ -70,7 +70,8 @@ interview-hub/
 │   └── package.json
 │
 └── server/                    → Express backend
-    ├── index.js              → Entry point
+    ├── app.js                → Express app factory
+    ├── index.js              → Server entry point
     ├── config.js             → Configuration
     ├── routes/               → API routes
     ├── controllers/          → Route logic
@@ -86,6 +87,7 @@ interview-hub/
     │   └── seed.js
     ├── data/questions/       → Built-in questions
     ├── datafiles/            → User document storage
+    ├── tests/                → API contract tests
     ├── .env.example
     └── package.json
 ```
@@ -219,6 +221,8 @@ Open browser: `http://localhost:5173`
 ### Status
 - `GET /api/status` - Health check
 
+Most app features require authentication. The dashboard and question catalogue can load publicly, then protected actions redirect to the existing login form. Auth sessions are held in an HTTP-only `ih_token` cookie and verified through `GET /api/auth/me` when the app starts.
+
 ## Environment Variables
 
 ### Server (.env)
@@ -226,10 +230,14 @@ Open browser: `http://localhost:5173`
 ```env
 DATABASE_URL=postgresql://postgres:password@localhost:5432/interview_app
 OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_API_KEY=
 CHAT_MODEL=llama3
 EMBED_MODEL=nomic-embed-text
 PORT=5000
 NODE_ENV=development
+AUTH_SECRET=change-this-long-random-secret
+CORS_ORIGINS=http://localhost:5173
+FRONTEND_URL=http://localhost:5173
 DATAFILES_PATH=./datafiles
 CHUNK_SIZE=500
 CHUNK_OVERLAP=50
@@ -288,12 +296,28 @@ npm run build
 
 Output in `dist/` ready for static hosting.
 
+### Tests
+
+```bash
+cd server
+npm test
+
+cd ../client
+npm run build
+```
+
 ### Production Deployment
 
-1. Deploy frontend to Vercel, Netlify, or static host
-2. Deploy backend to Heroku, Railway, or VPS
-3. Use managed PostgreSQL
-4. Set environment variables
+Use `DEPLOYMENT.md` for the Render + Netlify deployment. The frontend calls `/api`, and `netlify.toml` proxies those requests to the Render backend.
+
+For Ollama Cloud on Render:
+
+```env
+OLLAMA_BASE_URL=https://ollama.com
+OLLAMA_API_KEY=your-real-ollama-api-key
+CHAT_MODEL=glm-5.1
+EMBED_MODEL=nomic-embed-text
+```
 
 ## Troubleshooting
 

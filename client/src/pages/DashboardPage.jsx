@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useUIStore } from '../store/uiStore'
+import { useAuthStore } from '../store/authStore'
+import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/ui/Navbar'
 import Sidebar from '../components/ui/Sidebar'
 import TopicCard from '../components/interview/TopicCard'
@@ -22,7 +24,18 @@ const topics = [
 
 const DashboardPage = () => {
   const { darkMode, sidebarOpen } = useUIStore()
+  const { user } = useAuthStore()
+  const navigate = useNavigate()
   const [topicStats, setTopicStats] = useState({})
+
+  const requireLogin = (path) => {
+    if (user) {
+      navigate(path)
+      return
+    }
+
+    navigate('/login', { state: { from: { pathname: path } } })
+  }
 
   useEffect(() => {
     const loadStats = async () => {
@@ -69,6 +82,7 @@ const DashboardPage = () => {
                     hard: topicStats[topic]?.hard || 0,
                   }}
                   progress={45}
+                  onClick={() => requireLogin('/chat')}
                 />
               ))}
             </div>
