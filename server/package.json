@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "start:prod": "prisma migrate deploy && node index.js",
+    "start:prod": "prisma migrate deploy && node prisma/seed.js && node index.js",
     "dev": "nodemon index.js",
     "test": "node tests/api.test.js",
     "postinstall": "prisma generate",
