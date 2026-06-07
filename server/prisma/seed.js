@@ -14,11 +14,11 @@ const nodejs = require("../data/questions/nodejs.json");
 const sql_old = require("../data/questions/sql.json");
 const devops = require("../data/questions/devops.json");
 
-// ── Source 2: data/data-theory.json (79 theory questions in template format) ──
-const theoryData = require("../../data/data-theory.json");
+// ── Source 2: server/data/data-theory.json (79 theory questions in template format) ──
+const theoryData = require("../data/data-theory.json");
 
-// ── Source 3: data/data-coding.json (37 coding cards in template format) ─────
-const codingData = require("../../data/data-coding.json");
+// ── Source 3: server/data/data-coding.json (37 coding cards in template format) ─────
+const codingData = require("../data/data-coding.json");
 
 // ── Source 4: Extracted questions from 327 markdown files in data/Docs/ ────
 const extractedDevops = require("../data/questions/extracted/devops.json");
