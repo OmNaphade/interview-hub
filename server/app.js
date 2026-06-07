@@ -4,7 +4,7 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 
 const config = require("./config");
-const errorHandler = require("./middleware/errorHandler");
+const { errorHandler } = require("./middleware/errorHandler");
 
 const chatRoutes = require("./routes/chat");
 const questionRoutes = require("./routes/questions");
@@ -14,6 +14,7 @@ const progressRoutes = require("./routes/progress");
 const statusRoutes = require("./routes/status");
 const authRoutes = require("./routes/auth");
 const adminRoutes = require("./routes/admin");
+const playgroundRoutes = require("./routes/playground");
 
 function createApp() {
   const app = express();
@@ -90,6 +91,7 @@ function createApp() {
   app.use("/api/progress", progressRoutes);
   app.use("/api/status", statusRoutes);
   app.use("/api/admin", adminRoutes);
+  app.use("/api/playground", playgroundRoutes);
 
   app.use((req, res) => {
     res.status(404).json({ error: "Route not found" });

@@ -1,5 +1,5 @@
 const { prisma } = require("../prisma/client");
-const { chat } = require("../services/ollamaService");
+const { chat } = require("../services/groqService");
 
 // Start new interview session
 async function startInterview(req, res) {
@@ -67,7 +67,7 @@ async function submitAnswer(req, res) {
     const questionsData = session.questionsData;
     const currentQuestion = questionsData[questionIndex];
 
-    // Score the answer using Ollama
+    // Score the answer using GROQ
     const systemPrompt = `You are an expert interviewer scoring a candidate's answer.
 Score the answer on a scale of 1-10 based on:
 - Correctness and completeness

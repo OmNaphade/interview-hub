@@ -1,6 +1,6 @@
 const { prisma } = require("../prisma/client");
 const config = require("../config");
-const { streamChat, chat } = require("../services/ollamaService");
+const { streamChat, chat } = require("../services/groqService");
 const {
   getRelevantChunks,
   buildRAGPrompt,
@@ -51,7 +51,7 @@ async function createSession(req, res) {
     data: {
       title: title || "New Chat",
       mode: mode || "general",
-      model: model || config.ollama.chatModel,
+      model: model || config.groq.chatModel,
       userId: req.user.id,
     },
   });
@@ -99,7 +99,7 @@ async function streamMessage(req, res) {
       },
     });
 
-    // Build message history for Ollama
+    // Build message history for GROQ
     const messages = session.messages.map((m) => ({
       role: m.role,
       content: m.content,
@@ -150,7 +150,7 @@ async function streamMessage(req, res) {
       return originalWrite(chunk);
     };
 
-    await streamChat(res, messages, systemPrompt, session.model || config.ollama.chatModel);
+    await streamChat(res, messages, systemPrompt, session.model || config.groq.chatModel);
   } catch (error) {
     console.error("❌ Stream message error:", error);
     res.status(500).json({ error: error.message });

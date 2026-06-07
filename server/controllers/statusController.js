@@ -1,10 +1,10 @@
-const { ping } = require("../services/ollamaService");
+const { ping } = require("../services/groqService");
 const { prisma } = require("../prisma/client");
 
 // Health check
 async function pingStatus(req, res) {
   try {
-    const ollamaRunning = await ping();
+    const groqReachable = await ping();
     let dbConnected = true;
 
     try {
@@ -14,8 +14,8 @@ async function pingStatus(req, res) {
     }
 
     res.json({
-      status: ollamaRunning && dbConnected ? "ok" : "degraded",
-      ollama: ollamaRunning ? "running" : "offline",
+      status: groqReachable && dbConnected ? "ok" : "degraded",
+      ollama: groqReachable ? "running" : "offline",
       database: dbConnected ? "connected" : "disconnected",
     });
   } catch (error) {

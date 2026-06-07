@@ -1,5 +1,6 @@
 const { prisma } = require("../prisma/client");
 const { getTokenFromRequest, verifyToken } = require("../services/authService");
+const { AppError } = require("./errorHandler");
 
 async function requireAuth(req, res, next) {
   try {
@@ -7,7 +8,7 @@ async function requireAuth(req, res, next) {
     const payload = verifyToken(token);
 
     if (!payload?.sub) {
-      return res.status(401).json({ error: "Authentication required" });
+      throw new AppError(401, "Authentication required");
     }
 
     const user = await prisma.user.findUnique({
@@ -21,7 +22,7 @@ async function requireAuth(req, res, next) {
     });
 
     if (!user) {
-      return res.status(401).json({ error: "Authentication required" });
+      throw new AppError(401, "Authentication required");
     }
 
     req.user = user;

@@ -3,6 +3,8 @@ import { useParams, useSearchParams } from 'react-router-dom'
 import { BookOpen, CheckCircle2, Code2, ClipboardList, Map } from 'lucide-react'
 import Navbar from '../components/ui/Navbar'
 import Sidebar from '../components/ui/Sidebar'
+import CodingCard from '../components/interview/CodingCard'
+import TheoryCard from '../components/interview/TheoryCard'
 import { useUIStore } from '../store/uiStore'
 import { progressAPI, questionsAPI } from '../services/api'
 
@@ -136,19 +138,21 @@ const TopicPage = () => {
             ) : (
               <div className="space-y-4">
                 {filteredQuestions.length === 0 && <EmptyState label="No questions have been added for this section yet." />}
-                {filteredQuestions.map((question) => (
-                  <article key={question.id || question.questionText} className={`rounded border p-5 ${darkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
-                    <div className="mb-3 flex flex-wrap items-center gap-2 text-xs uppercase">
-                      <span className="rounded bg-blue-600 px-2 py-1 text-white">{question.difficulty || 'medium'}</span>
-                      <span className={darkMode ? 'text-gray-400' : 'text-gray-500'}>{question.source || 'builtin'}</span>
-                    </div>
-                    <h2 className="mb-3 text-lg font-semibold">{question.questionText}</h2>
-                    {question.starterCode && (
-                      <pre className="mb-3 overflow-x-auto rounded bg-gray-950 p-3 text-sm text-gray-100">{question.starterCode}</pre>
-                    )}
-                    <p className={darkMode ? 'whitespace-pre-wrap text-gray-300' : 'whitespace-pre-wrap text-gray-700'}>{question.answerText}</p>
-                  </article>
-                ))}
+                {filteredQuestions.map((question) => {
+                  // Use question.question for new template format, fallback to questionText for old format
+                  const cardData = {
+                    ...question,
+                    question: question.title || question.question || question.questionText,
+                    explanation: question.explanation || question.answerText,
+                    code: question.code || question.starterCode,
+                    tags: question.tags || [question.difficulty || 'Medium'].filter(Boolean),
+                  }
+                  return activeTab === 'coding' ? (
+                    <CodingCard key={question.id || question.questionText} question={cardData} />
+                  ) : (
+                    <TheoryCard key={question.id || question.questionText} question={cardData} />
+                  )
+                })}
               </div>
             )}
           </div>

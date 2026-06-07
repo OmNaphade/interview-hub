@@ -199,7 +199,17 @@ async function resetPassword(req, res) {
 
 function redirectAfterOAuth(req, res, success = true) {
   const target = new URL(config.auth.frontendUrl);
-  target.pathname = success ? getReturnTo(req) : "/login";
+  const returnPath = success ? getReturnTo(req) : "/login";
+
+  // Handle query parameters in return path (e.g., /topics/dsa?tab=coding)
+  const qIndex = returnPath.indexOf("?");
+  if (qIndex !== -1) {
+    target.pathname = returnPath.slice(0, qIndex);
+    target.search = returnPath.slice(qIndex + 1);
+  } else {
+    target.pathname = returnPath;
+  }
+
   if (!success) target.searchParams.set("error", "oauth_failed");
   clearReturnToCookie(res);
   res.redirect(target.toString());
@@ -232,7 +242,8 @@ function startGithub(req, res) {
 async function githubCallback(req, res) {
   try {
     if (!verifyState(req)) {
-      return res.status(400).json({ error: "Invalid OAuth state" });
+      redirectAfterOAuth(req, res, false);
+      return;
     }
 
     const profile = await getGithubProfile(req.query.code);
@@ -263,7 +274,8 @@ function startGoogle(req, res) {
 async function googleCallback(req, res) {
   try {
     if (!verifyState(req)) {
-      return res.status(400).json({ error: "Invalid OAuth state" });
+      redirectAfterOAuth(req, res, false);
+      return;
     }
 
     const profile = await getGoogleProfile(req.query.code);

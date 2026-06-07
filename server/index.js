@@ -3,13 +3,14 @@ require("dotenv").config();
 const config = require("./config");
 const { prisma } = require("./prisma/client");
 const { createApp } = require("./app");
+const { ensureImages, checkDocker } = require("./services/dockerService");
 
 const PORT = config.port;
 const app = createApp();
 
 const server = app.listen(PORT, async () => {
   console.log(`Server running on http://localhost:${PORT}`);
-  console.log(`Ollama: ${config.ollama.baseUrl}`);
+  console.log(`GROQ: ${config.groq.chatModel}`);
 
   try {
     await prisma.$queryRaw`SELECT 1`;
@@ -18,6 +19,14 @@ const server = app.listen(PORT, async () => {
     console.log("Database: disconnected");
     console.log(`Database error: ${error.message}`);
   }
+
+  // Check if Docker is available for the playground
+  setTimeout(async () => {
+    const available = await checkDocker();
+    if (available) {
+      ensureImages();
+    }
+  }, 2000);
 });
 
 server.on("error", (error) => {

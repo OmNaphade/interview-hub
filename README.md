@@ -1,386 +1,879 @@
-# Interview Hub - AI-Powered Interview Preparation
+# Interview Hub — AI-Powered Interview Preparation
 
-A full-stack interview preparation & AI assistant web application powered by Ollama locally or by an Ollama-compatible cloud host in production.
+A full-stack interview preparation web application with an AI assistant powered by **GROQ** (fast cloud LLM) for chat, a **code playground** with Docker container execution, and **Ollama** (local) for document embeddings.
 
-## Features
+---
 
-### 🤖 AI Chatbot
-- **Smart Chat Modes**: General, Code, Interview, ELI5, and My Notes (RAG)
-- **Real-time Streaming**: SSE-based streaming for smooth conversation
-- **Code Analysis**: Copy, explain, and get suggestions for code blocks
-- **Session Management**: Organize conversations by date
-- **RAG (Retrieval-Augmented Generation)**: Chat with your own documents
+## Architecture Overview
 
-### 📚 Interview Preparation
-- **Topic Dashboard**: 12+ technical topics with progress tracking
-- **Theory Questions**: Q&A with source documents
-- **Coding Challenges**: Monaco Editor with syntax highlighting
-- **Mock Interview Simulator**: AI scoring and feedback
-- **Study Roadmap**: Visual progress tracking
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Browser (Client)                      │
+│  React 18 + Vite + Tailwind CSS + Zustand + React Router│
+│  Port: 5173 (dev) / Netlify (prod)                      │
+└──────────────────────┬──────────────────────────────────┘
+                       │  HTTP (withCredentials: true)
+                       │  Vite dev proxy /api → :5000
+                       ▼
+┌─────────────────────────────────────────────────────────┐
+│                    Express.js Backend                    │
+│  Port: 5000 (dev) / Render (prod)                       │
+│                                                         │
+│  ┌─────────────┐  ┌──────────────┐  ┌───────────────┐   │
+│  │ Auth Routes  │  │  Chat Routes │  │Question/etc   │   │
+│  │ /api/auth/*  │  │  /api/chat/* │  │  /api/*       │   │
+│  └──────┬──────┘  └──────┬───────┘  └───────┬───────┘   │
+│         │                │                   │           │
+│         ▼                ▼                   ▼           │
+│  ┌──────────┐   ┌────────────┐   ┌──────────────────┐   │
+│  │authService│   │groqService │   │ ollamaService    │   │
+│  │oauthSvc   │   │(chat/score)│   │ (embeddings only)│   │
+│  │           │   │ragService  │   │ documentParser   │   │
+│  │           │   │dockerSvc   │   │ embeddingService │   │
+│  └────┬─────┘   └─────┬──────┘   └────────┬─────────┘   │
+│       │               │                   │              │
+│       ▼               ▼                   ▼              │
+│  ┌───────────────────────────────────────────────────┐   │
+│  │              Prisma ORM + PostgreSQL              │   │
+│  │         (pgvector for semantic search)            │   │
+│  └───────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────┘
+```
 
-### 📄 Document Management
-- **Multiple Formats**: PDF, DOCX, and URL ingestion
-- **Automatic Embedding**: pgvector-powered semantic search
-- **Question Generation**: AI generates Q&A from your documents
-- **Smart Tagging**: Auto-detect topics from documents
+### AI & Service Split
 
-## Tech Stack
+| Service | What it does | Provider |
+|---------|-------------|----------|
+| **groqService** | Streaming chat, code hints, interview scoring | GROQ Cloud (`api.groq.com`) |
+| **ollamaService** | Document embeddings (vector generation) | Ollama local (`localhost:11434`) |
+| **dockerService** | Code execution via Docker containers | Docker Desktop |
 
-### Frontend
-- **React 18** + **Vite** for development
-- **Tailwind CSS** for styling
-- **Monaco Editor** for code editing
-- **Zustand** for state management
-- **React Query** for data fetching
-- **Axios** for HTTP requests
-- **React Hot Toast** for notifications
+---
 
-### Backend
-- **Node.js** + **Express.js**
-- **PostgreSQL** with **Prisma ORM**
-- **pgvector** for vector embeddings
-- **Ollama** for local LLM + embeddings
+## Code Playground (Docker Execution)
 
-### Data Pipeline
-- **PDF parsing**: pdf-parse
-- **DOCX parsing**: mammoth
-- **Web scraping**: cheerio + axios
-- **Text chunking**: Custom chunking service
-- **Embeddings**: Ollama nomic-embed-text
+The playground lets you write and run code directly in the browser using Docker containers. Each language runs in its own isolated container with resource limits.
+
+### Supported Languages
+
+| Language | Docker Image | Type |
+|----------|-------------|------|
+| C++ | `gcc:13.2-bookworm` | Compiled |
+| Java 8 | `eclipse-temurin:8-jdk-jammy` | Compiled |
+| Java 11 | `eclipse-temurin:11-jdk-jammy` | Compiled |
+| Java 17 | `eclipse-temurin:17-jdk-jammy` | Compiled |
+| Java 21 | `eclipse-temurin:21-jdk-jammy` | Compiled |
+| JavaScript | `node:22-slim` | Interpreted |
+| Python | `python:3.12-slim` | Interpreted |
+| MySQL | `mysql:8.0` | Database |
+| PostgreSQL | `postgres:16` | Database |
+
+### How Code Execution Works
+
+```
+Browser                          Express                        Docker
+  │                                │                              │
+  │ POST /api/playground/run       │                              │
+  │ { language: "python",         │                              │
+  │   code: "print('Hi')" }       │                              │
+  │──────────────────────────────►│                              │
+  │                                │  Write code to temp file     │
+  │                                │                              │
+  │                                │  docker run --rm             │
+  │                                │    --network none            │
+  │                                │    -m 256m --cpus 1          │
+  │                                │    python:3.12-slim          │
+  │                                │    python3 /code/code.py     │
+  │                                │─────────────────────────────►│
+  │                                │                              │
+  │                                │◄──── stdout/stderr ─────────│
+  │                                │                              │
+  │                                │  Cleanup temp files          │
+  │◄───────────────────────────────│                              │
+  │ { output: "Hi", error: false } │                              │
+```
+
+### Security Measures
+
+- **Network isolation**: `--network none` — containers have no network access
+- **Memory limits**: 256MB for code, 512MB for Java, extended for databases
+- **CPU limits**: `--cpus 1` — single CPU core
+- **Process limits**: `--ulimit nproc=64` — max 64 processes
+- **File limits**: `--ulimit nofile=64` — max 64 open files
+- **Read-only code**: `:ro` mount for code containers
+- **Timeouts**: 30s for code execution, 120s for database startup
+- **Cleanup**: Temp directories and containers always destroyed after execution
+
+### Database Query Execution
+
+For MySQL and PostgreSQL, a full database container is started temporarily:
+
+1. Start container with the database image
+2. Wait for the database to be ready (polling with health checks)
+3. Execute the SQL query
+4. Capture output (formatted table)
+5. Kill and remove the container
+
+### Error Handling
+
+The playground has specific error messages for common Docker failures:
+
+| Error | User Message |
+|-------|-------------|
+| Docker not running | "Docker is not running. Please start Docker Desktop and try again." |
+| Image not found | "Docker image not found locally. Pulling images... Please try again in a moment." |
+| Code timed out | "Execution timed out. Your code may have an infinite loop or be too complex." |
+| Out of memory | "Out of memory. Your code used too much memory." |
+| Code too large | "Code exceeds maximum length of 100KB" |
+
+### Image Pre-pulling
+
+On server startup, Docker images are checked and pulled in parallel in the background:
+
+```bash
+docker pull python:3.12-slim
+docker pull node:22-slim
+docker pull gcc:13.2-bookworm
+docker pull mysql:8.0
+docker pull postgres:16
+docker pull eclipse-temurin:8-jdk-jammy
+docker pull eclipse-temurin:11-jdk-jammy
+docker pull eclipse-temurin:17-jdk-jammy
+docker pull eclipse-temurin:21-jdk-jammy
+```
+
+### Docker Availability Check
+
+On startup, the server automatically checks if Docker is available by running `docker info`:
+
+```
+✅ Docker available — playground execution enabled
+⚠️  Docker not available — playground execution disabled
+```
+
+If Docker is unavailable (common on Render's free tier):
+- The playground controller returns a **503** with a friendly message: "Code execution is not available on this server."
+- The `runCode()` function also has a guard that throws `AppError(503)` as a safety net
+- All other app features (chat, topics, profile) work normally
+
+### Production Deployment
+
+The playground **requires Docker** to execute code. On Render, Docker is only available on **paid plans** (Starter at $7/mo+). The free Node plan does not have a Docker daemon.
+
+**Options for production:**
+1. **Upgrade Render to Docker Web Service** ($7/mo) — Run the backend as a Docker container with Docker-in-Docker support for full playground functionality.
+2. **Self-host Piston on a free Oracle Cloud VM** — Deploy the [Piston](https://github.com/engineer-man/piston) code execution engine on Oracle's free tier (4 cores, 24GB RAM), then point your Render backend to it via HTTP API.
+3. **Graceful fallback** — When Docker is unavailable, the playground automatically detects this at startup and shows a clear message. No crashes, no empty responses.
+
+See `DEPLOYMENT.md` for detailed deployment instructions.
+
+---
+
+## Question Card System
+
+Questions are displayed using rich card components that support two formats:
+
+### Coding Cards (`CodingCard.jsx`)
+
+```
+┌──────────────────────────────────────────┐
+│ [Medium] [Java] [Frequent]               │
+│                                          │
+│ Two Sum — Find two numbers that add up   │
+│ to a target value (LeetCode #1)          │
+│                                          │
+│ ──────── Expand/Collapse ────────        │
+│                                          │
+│ TIME: O(n)   SPACE: O(n)                 │
+│                                          │
+│ Approach: Use a hash map to store        │
+│ seen values while iterating...           │
+│                                          │
+│ ┌──────────────────────────────────┐     │
+│ │ class Solution {                 │     │
+│ │   public int[] twoSum(...) {     │     │
+│ │     ...                          │     │
+│ │   }                              │     │
+│ └──────────────────────────────────┘     │
+│                                          │
+│ ⚠ Warning: Watch for integer overflow    │
+│ 💡 Tip: Try sorting first                │
+└──────────────────────────────────────────┘
+```
+
+Supports: difficulty badge, custom tags, time/space complexity, approach description, code block with copy button, note/tip/warning callouts, problem number with color.
+
+### Theory Cards (`TheoryCard.jsx`)
+
+```
+┌──────────────────────────────────────────┐
+│ [Easy] [Frequent]                        │
+│                                          │
+│ What is the difference between an array  │
+│ and a linked list?                       │
+│                                          │
+│ ──────── Expand/Collapse ────────        │
+│                                          │
+│ Arrays store elements contiguously...    │
+│                                          │
+│ ┌──────────────────────────────────┐     │
+│ │ Key Differences:                 │     │
+│ │ Array: O(1) access               │     │
+│ │ List: O(n) access                │     │
+│ └──────────────────────────────────┘     │
+│                                          │
+│ 📘 Note: Also be prepared to discuss...  │
+└──────────────────────────────────────────┘
+```
+
+Supports: HTML explanations, tables with headers/rows, code blocks, note/tip/warning callouts, tags.
+
+### Template JSON Files
+
+Template files for the card format are stored at `server/data/templates/`:
+
+- `coding-card.json` — Structure for a single coding problem
+- `coding-section.json` — Group of coding problems under a category
+- `theory-question.json` — Structure for a single theory question
+- `theory-section.json` — Group of theory questions under a category
+
+---
+
+## Authentication Flow
+
+### Auth Methods
+
+The app supports three authentication methods:
+
+1. **Email + Password** — Local account creation and login
+2. **Google OAuth 2.0** — Sign in with Google account
+3. **GitHub OAuth** — Sign in with GitHub account
+
+### How Authentication Works
+
+All auth sessions use an **HTTP-only cookie** named `ih_token` containing a custom HMAC-signed JWT (signed with `AUTH_SECRET`).
+
+```
+Auth Cookie: ih_token=<header>.<payload>.<signature>
+  • httpOnly: true (not accessible via JavaScript)
+  • sameSite: "lax" (sent for top-level navigations)
+  • secure: true in production (HTTPS only)
+  • maxAge: 7 days
+```
+
+### Password Auth Flow
+
+```
+Browser                              Server
+  │                                     │
+  │  POST /api/auth/login               │
+  │  { email, password }                │
+  │────────────────────────────────────►│
+  │                                     │
+  │  Verify password (scrypt hash)      │
+  │  Create JWT token                   │
+  │  Set ih_token cookie                │
+  │◄────────────────────────────────────│
+  │  { user: { id, email, name, ...} }  │
+  │                                     │
+  │  User stored in Zustand authStore   │
+```
+
+### Google OAuth Flow
+
+```
+Browser                         Express Server                    Google
+  │                                  │                              │
+  │ Click "Continue with Google"     │                              │
+  │ window.location =                │                              │
+  │  /api/auth/google?returnTo=...   │                              │
+  │─────────────────────────────────►│                              │
+  │                                  │  Set ih_oauth_state cookie   │
+  │                                  │  Set ih_oauth_return_to ck   │
+  │                                  │  302 → Google OAuth URL     │
+  │◄─────────────────────────────────│                              │
+  │                                  │                              │
+  │ 302 → accounts.google.com        │                              │
+  │───────────────────────────────────────────────────────────────►│
+  │              User authenticates                                 │
+  │◄───────────────────────────────────────────────────────────────│
+  │              Redirect to callback URL                           │
+  │                                                                 │
+  │ GET /api/auth/google/callback?code=xxx&state=yyy                │
+  │─────────────────────────────────►│                              │
+  │                                  │  Verify state cookie ==      │
+  │                                  │  state query param           │
+  │                                  │  Exchange code for token     │
+  │                                  │  Fetch user profile          │
+  │                                  │  Find or create user in DB   │
+  │                                  │  Set ih_token cookie         │
+  │                                  │  302 → FRONTEND_URL/dashboard│
+  │◄─────────────────────────────────│                              │
+  │                                  │                              │
+  │ Load React app at /dashboard     │                              │
+  │ GET /api/auth/me (cookie sent)   │                              │
+  │─────────────────────────────────►│                              │
+  │                                  │  Verify token, return user   │
+  │◄─────────────────────────────────│                              │
+  │ setUser(res.data.user)           │                              │
+```
+
+**Key security measures:**
+- OAuth state parameter prevents CSRF attacks
+- State stored in HTTP-only cookie, verified on callback
+- Google requires verified email (`email_verified: true`)
+- On state mismatch, user is redirected to `/login?error=oauth_failed`
+
+### GitHub OAuth Flow
+
+Same pattern as Google, but:
+- GitHub OAuth endpoint: `https://github.com/login/oauth/authorize`
+- Token exchange: `https://github.com/login/oauth/access_token`
+- Profile: `https://api.github.com/user` + `/user/emails`
+- Requires a verified primary email
+
+### Session Persistence
+
+On every full page load, `App.jsx` calls `GET /api/auth/me` which:
+1. Reads the `ih_token` cookie
+2. Verifies the HMAC signature
+3. Checks expiration (7-day TTL)
+4. Looks up the user in PostgreSQL
+5. Returns user data or clears the cookie
+
+### Admin Detection
+
+Admin status is determined by matching the user's email against the `ADMIN_EMAILS` environment variable. Admins see an "Admin" panel in the sidebar with user management, question CRUD, and analytics.
+
+---
+
+## Error Handling Architecture
+
+The application uses a centralized error handling system:
+
+### AppError Class
+
+Custom error class with status codes and structured responses:
+
+```js
+throw new AppError(400, "Validation failed", { field: "email" });
+// → { error: "Validation failed", details: { field: "email" } }
+```
+
+### Prisma Error Mapping
+
+| Prisma Code | HTTP Status | Message |
+|-------------|-------------|---------|
+| `P2002` | 409 Conflict | "A record with this value already exists" |
+| `P2025` | 404 Not Found | "Record not found" |
+| `P1001` | 503 Service Unavailable | "Cannot connect to database" |
+| `P2003` | 400 Bad Request | "Referenced record does not exist" |
+| `P2014` | 400 Bad Request | "Required relation violation" |
+
+### Network & Service Errors
+
+| Condition | HTTP Status | Message |
+|-----------|-------------|---------|
+| Timeout | 503 | "External service unavailable" |
+| Connection refused | 503 | "External service unavailable" |
+| Docker daemon down | 503 | "Docker is not running" |
+| Invalid JSON body | 400 | "Invalid JSON in request body" |
+
+### Frontend Error Handling
+
+The frontend playground (`PlaygroundPage.jsx`) has resilient fetch error handling:
+
+- Checks the `content-type` header before parsing JSON — if the server returns HTML (e.g., proxy error when backend is down), it falls back to showing the response text
+- Checks `res.ok` and displays the HTTP status code alongside the error message
+- Catches network errors and displays them clearly in the output panel instead of crashing
+
+In production, stack traces are hidden; in development they're included for debugging.
+
+---
+
+## Chat Flow (AI Conversation)
+
+### Streaming Architecture
+
+The chat uses **Server-Sent Events (SSE)** for real-time streaming:
+
+```
+Browser                          Server                        GROQ API
+  │                                │                              │
+  │ GET /api/chat/stream           │                              │
+  │ ?sessionId=abc&message=...     │                              │
+  │&mode=general                   │                              │
+  │───────────────────────────────►│                              │
+  │                                │  Fetch session history       │
+  │                                │  Save user message to DB     │
+  │                                │  Build system prompt by mode │
+  │                                │                              │
+  │                                │  POST /chat/completions      │
+  │                                │  { stream: true, ... }       │
+  │                                │─────────────────────────────►│
+  │                                │                              │
+  │ data: {"token":"The"}         │◄──── SSE chunk ──────────────│
+  │◄──────────────────────────────│                              │
+  │ data: {"token":" answer"}     │◄──── SSE chunk ──────────────│
+  │◄──────────────────────────────│                              │
+  │ data: {"token":" is..."}      │◄──── SSE chunk ──────────────│
+  │◄──────────────────────────────│                              │
+  │ data: {"done":true}           │                              │
+  │◄──────────────────────────────│                              │
+  │                                │  Save assistant message      │
+  │                                │  (on response "finish" event)│
+```
+
+### Chat Modes
+
+| Mode | System Prompt | Use Case |
+|------|--------------|----------|
+| `general` | Helpful AI assistant | Anything |
+| `code` | Expert programmer | Debugging, code review |
+| `interview` | Interview coach | Practice answers |
+| `eli5` | Explain Like I'm 5 | Simple explanations |
+| `rag` | Uses your documents | Chat with uploaded files |
+
+### RAG (Retrieval-Augmented Generation)
+
+When in `rag` mode:
+
+```
+User Question
+      │
+      ▼
+getEmbedding(question)  ──►  Ollama nomic-embed-text
+      │
+      ▼
+pgvector similarity search  ──►  SELECT ... ORDER BY embedding <-> query
+      │
+      ▼
+Top 5 chunks with context + user question
+      │
+      ▼
+Sent to GROQ as system prompt
+      │
+      ▼
+GROQ answers ONLY from your documents
+```
+
+---
+
+## Document Ingestion Pipeline
+
+```
+Upload PDF/DOCX or URL
+      │
+      ▼
+extractPDF / extractDOCX / extractURL
+      │
+      ▼
+chunkText(text, size=500, overlap=50)
+      │
+      ▼
+For each chunk:
+  getEmbedding(chunk)  ──►  Ollama embed model
+  Store chunk + vector in DocumentChunk table
+      │
+      ▼
+detectTopics(text)  ──►  Keyword matching → topic tags
+      │
+      ▼
+generateQuestionsFromDocument  ──►  Ollama generates Q&A
+      │
+      ▼
+Questions saved to Question table with source="ai_generated"
+```
+
+---
+
+## Interview System
+
+```
+User selects topic + difficulty
+      │
+      ▼
+Fetch questions matching topic & difficulty from DB
+      │
+      ▼
+Create InterviewSession with question data
+      │
+      ▼
+For each question:
+  User submits answer
+      │
+      ▼
+  Send to GROQ: "Score this answer 1-10"
+      │
+      ▼
+  Parse JSON response: { score, feedback }
+      │
+      ▼
+  Update session with score
+      │
+      ▼
+After all questions:
+  Calculate overall average score
+  Mark session as completed
+```
+
+---
 
 ## Project Structure
 
 ```
 interview-hub/
-├── client/                    → React frontend (Vite)
+├── client/                          # React frontend
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── chat/         → Chat UI components
-│   │   │   ├── interview/    → Interview components
-│   │   │   └── ui/           → Common UI components
-│   │   ├── pages/            → Route pages
-│   │   ├── hooks/            → Custom React hooks
-│   │   ├── store/            → Zustand stores
-│   │   ├── services/         → API service
-│   │   ├── data/             → Static question data
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   ├── vite.config.js
+│   │   │   ├── chat/               # ChatInput, MessageBubble, CodeBlock, etc.
+│   │   │   ├── interview/          # CodingCard, TheoryCard, TopicCard, QuestionAccordion
+│   │   │   └── ui/                 # Navbar, Sidebar, Toast, SkeletonLoader
+│   │   ├── pages/                  # Login, Dashboard, Chat, Topic, Profile, Admin, Playground
+│   │   ├── hooks/                  # useOllama (chat streaming hook)
+│   │   ├── store/                  # Zustand: authStore, chatStore, uiStore
+│   │   ├── services/               # api.js (Axios client with all endpoints)
+│   │   ├── App.jsx                 # Router, protected routes, auth init
+│   │   ├── main.jsx                # Entry point
+│   │   └── index.css               # Tailwind base styles
+│   ├── vite.config.js              # Vite + React + API proxy
 │   ├── tailwind.config.js
 │   └── package.json
 │
-└── server/                    → Express backend
-    ├── app.js                → Express app factory
-    ├── index.js              → Server entry point
-    ├── config.js             → Configuration
-    ├── routes/               → API routes
-    ├── controllers/          → Route logic
-    ├── services/             → Business logic
-    │   ├── ollamaService.js
-    │   ├── ragService.js
-    │   ├── documentParser.js
-    │   ├── embeddingService.js
-    ├── middleware/           → Express middleware
+└── server/                          # Express backend
+    ├── app.js                       # Express app factory (CORS, helmet, rate-limit)
+    ├── index.js                     # Server entry point
+    ├── config.js                    # Environment config loader
+    ├── routes/
+    │   ├── auth.js                  # /api/auth/* (login, signup, OAuth, password reset)
+    │   ├── chat.js                  # /api/chat/* (sessions, streaming, hints)
+    │   ├── questions.js             # /api/questions/* (topics, questions)
+    │   ├── interview.js             # /api/interview/* (start, answer, summary)
+    │   ├── documents.js             # /api/documents/* (ingest, search, chunks)
+    │   ├── progress.js              # /api/progress/* (tracking, bookmarks)
+    │   ├── status.js                # /api/status (health check)
+    │   ├── admin.js                 # /api/admin/* (users, questions, analytics)
+    │   └── playground.js            # /api/playground/* (Docker code execution)
+    ├── controllers/                 # Route handler logic
+    ├── services/
+    │   ├── groqService.js           # GROQ API (streaming + non-streaming chat)
+    │   ├── ollamaService.js         # Ollama API (embeddings only)
+    │   ├── dockerService.js         # Docker code execution (9 language images)
+    │   ├── authService.js           # JWT creation/verification, password hashing
+    │   ├── oauthService.js          # Google + GitHub OAuth flows
+    │   ├── ragService.js            # Vector search + prompt building
+    │   ├── documentParser.js        # PDF/DOCX/URL extraction, chunking
+    │   └── embeddingService.js      # Store chunks + generate questions
+    ├── middleware/
+    │   ├── auth.js                  # requireAuth middleware (uses AppError)
+    │   ├── admin.js                 # Admin role check
+    │   ├── asyncHandler.js          # Async error wrapper
+    │   ├── errorHandler.js          # Centralized error handler (AppError, Prisma, network)
+    │   └── streamHandler.js         # SSE headers + keep-alive
     ├── prisma/
-    │   ├── schema.prisma
-    │   ├── migrations/
-    │   └── seed.js
-    ├── data/questions/       → Built-in questions
-    ├── datafiles/            → User document storage
-    ├── tests/                → API contract tests
-    ├── .env.example
-    └── package.json
+    │   ├── schema.prisma            # Database schema
+    │   ├── client.js                # Prisma client singleton
+    │   ├── seed.js                  # Question seeder
+    │   └── migrations/              # Database migrations
+    ├── data/
+    │   ├── questions/               # Built-in JSON question files (12 topics)
+    │   └── templates/               # Question card template JSON files
+    └── tests/                       # API tests
 ```
 
-## Prerequisites
+---
 
-- **Node.js** 16+ (for server and client)
-- **PostgreSQL** 13+ running locally or on network
-- **Ollama** running with models pulled
-- **Windows/Mac/Linux**
+## Sidebar Navigation
 
-## Setup Instructions
+The sidebar provides quick access to:
 
-### 1. **Install Ollama & Pull Models**
+| Item | Path | Description |
+|------|------|-------------|
+| Dashboard | `/dashboard` | Topic overview with progress |
+| Chat | `/chat` | AI chat with multiple modes |
+| Topics | `/topics/:topic` | Subject pages (expandable list of 12 topics) |
+| Coding (Playground) | `/playground` | Code playground with Docker execution |
+| Profile | `/profile` | Account settings, password change |
+| Admin | `/admin` | Admin panel (admin users only) |
 
-Download Ollama from https://ollama.ai and install it.
+---
 
-```bash
-ollama pull llama3
-ollama pull nomic-embed-text
-ollama serve
-```
+## Database Schema
 
-Keep the Ollama terminal open (runs on `http://localhost:11434`)
+| Table | Purpose | Key Fields |
+|-------|---------|------------|
+| `User` | User accounts | id, email, name, passwordHash, createdAt |
+| `PasswordResetToken` | Password reset flow | userId, tokenHash, expiresAt, usedAt |
+| `ChatSession` | Chat conversations | userId, title, mode, model |
+| `Message` | Individual messages | sessionId, role, content, sources (JSON) |
+| `Question` | Interview questions | topic, questionText, answerText, difficulty, type |
+| `RoadmapItem` | Study roadmap | topic, title, description, order |
+| `Bookmark` | Saved questions | userId, questionId |
+| `TopicProgress` | User progress | userId, topic, stepName, status |
+| `Document` | Uploaded files | userId, filename, fileHash, status |
+| `DocumentChunk` | Text chunks with vectors | documentId, chunkText, embedding (vector(768)) |
+| `InterviewSession` | Mock interviews | userId, topic, difficulty, questionsData (JSON) |
 
-### 2. **Setup PostgreSQL**
-
-Create database and enable pgvector:
-
-```bash
-createdb interview_app
-
-psql -d interview_app -c "CREATE EXTENSION IF NOT EXISTS vector;"
-```
-
-On Windows, if that command fails with `extension "vector" is not available`,
-use the pgvector Docker database included in this repo:
-
-```bash
-docker compose up -d postgres
-```
-
-Then set `server/.env` to:
-
-```env
-DATABASE_URL="postgresql://om_2026:postgres@localhost:5433/interviewdb"
-```
-
-The Docker database uses host port `5433`, so it can run beside a local
-PostgreSQL install that is already using `5432`.
-
-### 3. **Setup Backend**
-
-```bash
-cd server
-
-# Create .env file
-cp .env.example .env
-
-# Edit .env with your database credentials
-# DATABASE_URL="postgresql://postgres:password@localhost:5432/interview_app"
-
-# Install dependencies
-npm install
-
-# Generate Prisma client
-npx prisma generate
-
-# Run migrations
-npx prisma migrate dev --name init
-
-# Seed database with questions
-node prisma/seed.js
-
-# Start server
-npm run dev
-```
-
-Server runs on `http://localhost:5000`
-
-### 4. **Setup Frontend**
-
-```bash
-cd client
-
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-```
-
-Frontend runs on `http://localhost:5173`
-
-### 5. **Access Application**
-
-Open browser: `http://localhost:5173`
+---
 
 ## API Endpoints
 
-### Chat
-- `GET /api/chat/sessions` - List all chat sessions
-- `GET /api/chat/sessions/:id` - Get session with messages
-- `POST /api/chat/sessions` - Create new session
-- `DELETE /api/chat/sessions/:id` - Delete session
-- `GET /api/chat/stream` - SSE stream for AI responses
+### Authentication (`/api/auth/*`)
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/signup` | No | Create account |
+| POST | `/login` | No | Email/password login |
+| POST | `/logout` | No | Clear auth cookie |
+| GET | `/me` | Required | Get current user |
+| PUT | `/me` | Required | Update profile |
+| PUT | `/password` | Required | Change password |
+| POST | `/password/forgot` | No | Request reset |
+| POST | `/password/reset` | No | Reset password |
+| GET | `/config` | No | Auth methods available |
+| GET | `/google` | No | Start Google OAuth |
+| GET | `/google/callback` | No | Google OAuth callback |
+| GET | `/github` | No | Start GitHub OAuth |
+| GET | `/github/callback` | No | GitHub OAuth callback |
 
-### Questions
-- `GET /api/questions/:topic` - Get questions by topic
-- `GET /api/questions/:topic/:id` - Get single question
+### Playground (`/api/playground/*`)
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/run` | Required | Execute code in Docker container |
+| GET | `/languages` | Required | Get supported languages |
 
-### Interview
-- `POST /api/interview/start` - Start mock interview
-- `POST /api/interview/answer` - Submit answer & score
-- `GET /api/interview/summary/:id` - Get session results
+### Chat (`/api/chat/*`)
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/sessions` | Required | List chat sessions |
+| GET | `/sessions/:id` | Required | Get session messages |
+| POST | `/sessions` | Required | Create session |
+| DELETE | `/sessions/:id` | Required | Delete session |
+| GET | `/stream` | Required | SSE streaming chat |
+| POST | `/hint` | Required | Get coding hint |
+| POST | `/review` | Required | Get code review |
 
-### Documents
-- `POST /api/documents/ingest` - Ingest PDF/DOCX/URL
-- `GET /api/documents` - List all documents
-- `GET /api/documents/:id/chunks` - Preview document chunks
-- `DELETE /api/documents/:id` - Delete document
-- `POST /api/documents/search` - RAG semantic search
+### Questions (`/api/questions/*`)
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/:topic` | No | Get questions by topic |
+| GET | `/:topic/:id` | No | Get single question |
+| GET | `/:topic/roadmap` | No | Get roadmap items |
 
-### Progress & Bookmarks
-- `GET /api/progress` - Get all progress
-- `PUT /api/progress/:topic/:step` - Update progress
-- `GET /api/progress/bookmarks` - Get bookmarks
-- `POST /api/progress/bookmarks` - Add bookmark
-- `DELETE /api/progress/bookmarks/:id` - Remove bookmark
+### Interview (`/api/interview/*`)
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/start` | Required | Start mock interview |
+| POST | `/answer` | Required | Submit answer, get score |
+| GET | `/summary/:id` | Required | Get session results |
 
-### Status
-- `GET /api/status` - Health check
+### Documents (`/api/documents/*`)
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/ingest` | Required | Upload PDF/DOCX/URL |
+| GET | `/` | Required | List documents |
+| GET | `/:id/chunks` | Required | Preview chunks |
+| DELETE | `/:id` | Required | Delete document |
+| POST | `/generate-questions` | Required | AI generate Q&A |
+| POST | `/search` | Required | Semantic search |
 
-Most app features require authentication. The dashboard and question catalogue can load publicly, then protected actions redirect to the existing login form. Auth sessions are held in an HTTP-only `ih_token` cookie and verified through `GET /api/auth/me` when the app starts.
+### Progress (`/api/progress/*`)
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/` | Required | Get all progress |
+| PUT | `/:topic/:step` | Required | Update progress |
+| GET | `/bookmarks` | Required | List bookmarks |
+| POST | `/bookmarks` | Required | Add bookmark |
+| DELETE | `/bookmarks/:id` | Required | Remove bookmark |
 
-## Environment Variables
+### Admin (`/api/admin/*`)
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/dashboard` | Admin | Stats/analytics |
+| GET | `/users` | Admin | List users |
+| DELETE | `/users/:id` | Admin | Delete user |
+| GET | `/questions` | Admin | List questions |
+| POST | `/questions` | Admin | Create question |
+| PUT | `/questions/:id` | Admin | Update question |
+| DELETE | `/questions/:id` | Admin | Delete question |
+| GET | `/progress` | Admin | All progress |
+| DELETE | `/progress/:id` | Admin | Delete progress |
+| GET | `/roadmap` | Admin | List roadmap |
+| POST | `/roadmap` | Admin | Create roadmap item |
+| PUT | `/roadmap/:id` | Admin | Update roadmap item |
+| DELETE | `/roadmap/:id` | Admin | Delete roadmap item |
 
-### Server (.env)
+---
+
+## Tech Stack
+
+### Frontend
+- **React 18** with functional components + hooks
+- **Vite** for dev server and builds
+- **Tailwind CSS** for styling (dark mode toggle)
+- **React Router v6** for client-side routing
+- **Zustand** for state management (auth, chat, UI)
+- **Axios** for HTTP with `withCredentials: true`
+- **Lucide React** for icons
+- **Monaco Editor** (@monaco-editor/react) for code editing in playground
+
+### Backend
+- **Node.js** + **Express.js** (middleware-based architecture)
+- **Prisma ORM** with PostgreSQL
+- **pgvector** extension for vector similarity search
+- **Custom JWT** (HMAC-SHA256 signed, no library needed)
+- **scrypt** for password hashing (Node.js built-in)
+- **Docker** for code execution (9 language images)
+
+### AI Services
+- **GROQ** — Primary LLM for chat, code review, interview scoring
+- **Ollama** — Local embeddings for document vectorization
+
+### Data Processing
+- **pdf-parse** — PDF text extraction
+- **mammoth** — DOCX text extraction
+- **cheerio + axios** — Web scraping
+
+---
+
+## Setup (Quick)
+
+### Prerequisites
+- Node.js 16+
+- PostgreSQL 13+ with pgvector extension (or Docker from docker-compose.yml)
+- Docker Desktop (for playground code execution)
+- Ollama installed (for document embeddings)
+
+### Backend
+```bash
+cd server
+cp .env.example .env
+# Edit .env with your database URL, GROQ API key, OAuth credentials
+npm install
+npx prisma generate
+npx prisma migrate dev --name init
+node prisma/seed.js
+npm run dev
+```
+
+### Frontend
+```bash
+cd client
+npm install
+npm run dev
+```
+
+### Docker Images (for Playground)
+On first server start, Docker images are pulled automatically in the background.
+Or pull them manually:
+```bash
+docker pull python:3.12-slim
+docker pull node:22-slim
+docker pull gcc:13.2-bookworm
+docker pull eclipse-temurin:17-jdk-jammy
+docker pull mysql:8.0
+docker pull postgres:16
+```
+
+### Access
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:5000`
+- Playground: `http://localhost:5173/playground`
+- Ollama: `http://localhost:11434`
+
+---
+
+## OAuth Setup
+
+### Google
+1. Create OAuth 2.0 Client ID in [Google Cloud Console](https://console.cloud.google.com)
+2. Add authorized redirect URI: `http://localhost:5173/api/auth/google/callback`
+3. Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in `.env`
+
+### GitHub
+1. Create OAuth App in [GitHub Developer Settings](https://github.com/settings/developers)
+2. Set callback URL: `http://localhost:5173/api/auth/github/callback`
+3. Set `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` in `.env`
+
+---
+
+## Environment Variables (template only, no real values)
 
 ```env
-DATABASE_URL=postgresql://postgres:password@localhost:5432/interview_app
-OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_API_KEY=
-CHAT_MODEL=llama3
-EMBED_MODEL=nomic-embed-text
+# Database
+DATABASE_URL="postgresql://user:password@host:5432/database"
+
+# GROQ (Primary AI chat)
+GROQ_API_KEY="your-groq-api-key"
+GROQ_MODEL="llama-3.1-8b-instant"
+
+# Ollama (Local embeddings only)
+OLLAMA_BASE_URL="http://localhost:11434"
+EMBED_MODEL="nomic-embed-text"
+
+# Server
 PORT=5000
-NODE_ENV=development
-AUTH_SECRET=change-this-long-random-secret
-CORS_ORIGINS=http://localhost:5173
-FRONTEND_URL=http://localhost:5173
-ADMIN_EMAILS=masteroman1234@gmail.com
-DATAFILES_PATH=./datafiles
+NODE_ENV="development"
+AUTH_SECRET="at-least-32-random-chars"
+FRONTEND_URL="http://localhost:5173"
+ALLOW_PASSWORD_AUTH=true
+ADMIN_EMAILS="admin@example.com"
+
+# OAuth
+GOOGLE_CLIENT_ID=""
+GOOGLE_CLIENT_SECRET=""
+GOOGLE_CALLBACK_URL="http://localhost:5173/api/auth/google/callback"
+GITHUB_CLIENT_ID=""
+GITHUB_CLIENT_SECRET=""
+GITHUB_CALLBACK_URL="http://localhost:5173/api/auth/github/callback"
+
+# RAG
 CHUNK_SIZE=500
 CHUNK_OVERLAP=50
 TOP_K_CHUNKS=5
 ```
 
-## Database Schema
+---
 
-Key tables:
-- **ChatSession** - Chat conversations
-- **Message** - Chat messages with optional RAG sources
-- **Question** - Interview questions (built-in, AI-generated, user-uploaded)
-- **Document** - Ingested documents metadata
-- **DocumentChunk** - Text chunks with vector embeddings
-- **Bookmark** - Bookmarked questions
-- **TopicProgress** - Roadmap progress tracking
-- **InterviewSession** - Mock interview results
+## Deployment Architecture
 
-## Features in Detail
-
-### Chat Modes
-
-1. **General** - Helpful assistant for any question
-2. **Code** - Expert programming assistant
-3. **Interview** - Coaching-style feedback
-4. **ELI5** - Beginner-friendly explanations
-5. **From My Notes (RAG)** - Only answers from your documents
-
-### Document Ingestion
-
-1. Drop files in `/server/datafiles/` or use UI
-2. System automatically:
-   - Extracts text from PDF/DOCX
-   - Fetches content from URLs
-   - Chunks text intelligently
-   - Generates embeddings
-   - Detects topics
-   - Generates Q&A
-
-### Interview Simulator
-
-- Select topic + difficulty
-- AI asks questions sequentially
-- Score each answer 1-10
-- Get detailed feedback
-- View performance analytics
-
-## Build & Deploy
-
-### Production Build (Frontend)
-
-```bash
-cd client
-npm run build
+```
+Netlify                          Render                         Supabase
+┌──────────┐    /api/* proxy     ┌──────────┐                  ┌──────────┐
+│ Frontend │──────────────────►  │ Backend  │──────────────────►│PostgreSQL│
+│ SPA      │   netlify.toml     │ Express  │  Prisma ORM      │+pgvector │
+│ dist/    │                     │ :5000    │                  │          │
+└──────────┘                     └────┬─────┘                  └──────────┘
+                                      │
+                                      ├── GROQ API (chat/score)
+                                      │
+                                      └── Docker (playground execution)
 ```
 
-Output in `dist/` ready for static hosting.
+- **Frontend**: Netlify (static hosting, SPA redirect)
+- **Backend**: Render Web Service (Node)
+- **Database**: Supabase (PostgreSQL + pgvector)
+- **AI Chat**: GROQ (cloud API, no hosting needed)
+- **Playground**: Docker on the backend machine
+- **Embeddings**: Ollama on Render (or local machine)
 
-### Tests
-
-```bash
-cd server
-npm test
-
-cd ../client
-npm run build
-```
-
-### Production Deployment
-
-Use `DEPLOYMENT.md` for the Render + Netlify deployment. The frontend calls `/api`, and `netlify.toml` proxies those requests to the Render backend.
-
-Admin access is controlled by `ADMIN_EMAILS`, a comma-separated env var. The app defaults to `masteroman1234@gmail.com`, but production should set it explicitly so you can change admins without editing code.
-
-For Ollama Cloud on Render:
-
-```env
-OLLAMA_BASE_URL=https://ollama.com
-OLLAMA_API_KEY=your-real-ollama-api-key
-CHAT_MODEL=glm-5.1
-EMBED_MODEL=nomic-embed-text
-```
-
-## Troubleshooting
-
-### Ollama Connection Error
-- Ensure `ollama serve` is running
-- Check `http://localhost:11434/api/tags`
-- Verify OLLAMA_BASE_URL in .env
-
-### Database Connection Error
-- Verify PostgreSQL is running
-- Check DATABASE_URL is correct
-- Run `psql -d interview_app` to test
-
-### Vector Extension Missing
-- Run: `psql -d interview_app -c "CREATE EXTENSION IF NOT EXISTS vector;"`
-- If PostgreSQL says `extension "vector" is not available`, run `docker compose up -d postgres` and point `DATABASE_URL` at `localhost:5433`
-
-### Slow Embeddings
-- Embeddings are GPU-intensive
-- Consider CPU-optimized models
-- Run Ollama on separate machine
-
-## Performance Tips
-
-1. **Use GPU** for Ollama: Set up CUDA if available
-2. **Scale backend** with PM2 or clustering
-3. **Cache responses** with Redis
-4. **Optimize images** and lazy load components
-5. **Use database indexes** on frequently queried columns
-
-## Contributing
-
-Contributions welcome! Please:
-1. Fork the repo
-2. Create feature branch
-3. Make changes
-4. Submit pull request
-
-## License
-
-MIT License - see LICENSE file
-
-## Support
-
-For issues and questions:
-- Check GitHub Issues
-- Review documentation above
-- Run diagnostics: `curl http://localhost:5000/health`
-
-## Roadmap
-
-- [ ] Multiple language support
-- [ ] Real-time multiplayer interviews
-- [ ] Video recording for practice
-- [ ] Advanced analytics dashboard
-- [ ] Mobile app
-- [ ] Integration with LeetCode/HackerRank
-- [ ] Spaced repetition system
-- [ ] Peer review features
+See `DEPLOYMENT.md` for detailed deployment steps.
 
 ---
 
-Built with ❤️ for interview preparation
+## Key Design Decisions
+
+1. **GROQ over Ollama for chat**: GROQ provides faster inference (8B parameter model at cloud speed) vs running Ollama locally. Ollama is kept for embeddings since GROQ doesn't support them.
+
+2. **Custom JWT instead of passport**: Lighter weight, no extra dependencies. HMAC-SHA256 signed tokens with the AUTH_SECRET. Token stored in HTTP-only cookie for XSS protection.
+
+3. **Manual cookie parsing**: Instead of the `cookie-parser` middleware, cookies are parsed directly from the `Cookie` header. This keeps dependencies minimal.
+
+4. **OAuth state in cookies**: State parameter is stored in an HTTP-only cookie rather than session storage. This avoids needing `express-session` and works with the stateless API design.
+
+5. **SSE over WebSocket**: Server-Sent Events are simpler for one-way streaming (server → client). No WebSocket library needed, works over standard HTTP, and auto-reconnects.
+
+6. **pgvector for RAG**: Vector similarity search is done directly in PostgreSQL using the pgvector extension. No need for a separate vector database like Pinecone or Weaviate.
+
+7. **Docker containers for code execution**: Each language runs in its own isolated container with memory/CPU/network restrictions. Database queries spin up temporary containers that are destroyed after use.
+
+8. **Centralized error handling**: All errors flow through a single middleware that maps Prisma error codes, network failures, and application errors to consistent JSON responses. In production, stack traces are hidden.

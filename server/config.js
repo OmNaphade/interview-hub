@@ -89,10 +89,13 @@ module.exports = {
         "http://localhost:5173/api/auth/google/callback",
     },
   },
+  groq: {
+    apiKey: process.env.GROQ_API_KEY || "",
+    chatModel: process.env.GROQ_MODEL || "llama-3.1-8b-instant",
+  },
   ollama: {
     baseUrl: process.env.OLLAMA_BASE_URL || "http://localhost:11434",
     apiKey: process.env.OLLAMA_API_KEY || "",
-    chatModel: process.env.CHAT_MODEL || "llama3",
     embedModel: process.env.EMBED_MODEL || "nomic-embed-text",
   },
   database: {

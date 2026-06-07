@@ -6,14 +6,11 @@ import {
   MessageSquare,
   BookOpen,
   Code2,
-  Zap,
-  Map,
-  Bookmark,
-  FileText,
   Shield,
   User,
   ChevronRight,
   ChevronDown,
+  Play,
 } from 'lucide-react'
 
 const Sidebar = () => {
@@ -47,11 +44,7 @@ const Sidebar = () => {
         { icon: BookOpen, label: 'Dashboard', path: '/dashboard' },
         { icon: MessageSquare, label: 'Chat', path: '/chat' },
         { icon: BookOpen, label: 'Topics', group: 'topics', children: topicChildren },
-        { icon: Code2, label: 'Coding', group: 'coding', children: topicChildren.map((item) => ({ ...item, path: `${item.path}?tab=coding` })) },
-        { icon: Zap, label: 'Interview', group: 'interview', children: topicChildren.map((item) => ({ ...item, path: `${item.path}?tab=interview` })) },
-        { icon: Map, label: 'Roadmap', group: 'roadmap', children: topicChildren.map((item) => ({ ...item, path: `${item.path}?tab=roadmap` })) },
-        { icon: Bookmark, label: 'Bookmarks', path: '/bookmarks' },
-        { icon: FileText, label: 'Documents', path: '/documents' },
+        { icon: Play, label: 'Coding', path: '/playground' },
         { icon: User, label: 'Profile', path: '/profile' },
         ...(user.isAdmin ? [{ icon: Shield, label: 'Admin', path: '/admin' }] : []),
       ]

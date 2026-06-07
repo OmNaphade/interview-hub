@@ -31,7 +31,7 @@ const Navbar = () => {
       await authAPI.logout()
     } finally {
       clearUser()
-      navigate('/dashboard')
+      navigate('/')
     }
   }
 

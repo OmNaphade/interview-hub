@@ -12,6 +12,7 @@ import LoginPage from './pages/LoginPage'
 import PlaceholderPage from './pages/PlaceholderPage'
 import TopicPage from './pages/TopicPage'
 import ProfilePage from './pages/ProfilePage'
+import PlaygroundPage from './pages/PlaygroundPage'
 import AdminPage from './pages/AdminPage'
 
 import './index.css'
@@ -94,6 +95,7 @@ function App() {
           <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
           <Route path="/admin" element={<AdminRoute><AdminPage /></AdminRoute>} />
           <Route path="/coding" element={<ProtectedRoute><PlaceholderPage title="Coding Challenges" /></ProtectedRoute>} />
+          <Route path="/playground" element={<ProtectedRoute><PlaygroundPage /></ProtectedRoute>} />
           <Route path="/simulator" element={<ProtectedRoute><PlaceholderPage title="Mock Interview" /></ProtectedRoute>} />
           <Route path="/roadmap" element={<ProtectedRoute><PlaceholderPage title="Study Roadmap" /></ProtectedRoute>} />
           <Route path="/bookmarks" element={<ProtectedRoute><PlaceholderPage title="Bookmarks" /></ProtectedRoute>} />
