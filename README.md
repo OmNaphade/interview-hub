@@ -2,7 +2,7 @@
 > AI-powered interview preparation platform with semantic search, RAG pipelines, Docker code execution, and specialised chat modes.
 
 [![Live Demo](https://img.shields.io/badge/Live-Demo-1D9E75?style=flat-square)](https://interview-hub-frontend.netlify.app)
-[![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub_Actions-2088FF?style=flat-square&logo=github-actions)](https://github.com/OmNaphade/interview-hub/actions)
+<!-- [![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub_Actions-2088FF?style=flat-square&logo=github-actions)](https://github.com/OmNaphade/interview-hub/actions) -->
 [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
 
 > ⚠️ **Heads up:** The backend runs on Render's free tier — it spins down after inactivity. Questions may take a moment to load on every visit. Please be patient.
