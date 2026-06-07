@@ -190,6 +190,4 @@ async function seed() {
   }
 }
 
-let seqId = 1000;
-
 seed();
