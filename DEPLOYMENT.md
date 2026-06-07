@@ -86,6 +86,8 @@ InterviewSession
 
 Create a Render Web Service from the same GitHub repo.
 
+### Standard Deployment (Free — No Code Playground)
+
 Recommended settings:
 
 ```txt
@@ -96,7 +98,24 @@ Build Command: npm install
 Start Command: npm run start:prod
 ```
 
-If Render shows Docker by default, switch it to Node. Docker is optional and not needed for the normal deployment.
+If Render shows Docker by default, switch it to Node. Docker is not needed for the core app functions.
+
+> **Playground note:** The code playground requires Docker. On Render's free Node plan, Docker is not available. The server automatically detects this at startup (`docker info` check) and returns a clear 503 message. All other features work normally. See section 8 below for playground deployment options.
+
+### Docker Deployment (Paid — Full Playground)
+
+To enable the code playground in production, upgrade to a **Render Docker Web Service** (Starter $7/mo+):
+
+```txt
+Language: Docker
+Branch: main
+Root Directory: server
+Dockerfile Path: Dockerfile
+```
+
+**Note:** The `server/Dockerfile` will need Docker-in-Docker (DinD) support for playground execution. See playground deployment options in section 8.
+
+### Environment Variables
 
 Add these Render environment variables:
 
@@ -110,10 +129,16 @@ CORS_ORIGINS=https://temporary-placeholder.netlify.app
 FRONTEND_URL=https://temporary-placeholder.netlify.app
 ADMIN_EMAILS=masteroman1234@gmail.com
 ALLOW_PASSWORD_AUTH=false
-OLLAMA_BASE_URL=https://ollama.com
-OLLAMA_API_KEY=your-real-ollama-api-key
-CHAT_MODEL=glm-5.1
-EMBED_MODEL=nomic-embed-text
+
+# GROQ (Primary AI chat — cloud, no hosting needed)
+GROQ_API_KEY=your-groq-api-key
+GROQ_MODEL=llama-3.1-8b-instant
+
+# Ollama (Local embeddings — only if you have an Ollama host)
+# OLLAMA_BASE_URL=http://your-ollama-host:11434
+# OLLAMA_API_KEY=
+# EMBED_MODEL=nomic-embed-text
+
 DATAFILES_PATH=./datafiles
 CHUNK_SIZE=500
 CHUNK_OVERLAP=50
@@ -158,42 +183,44 @@ For this deployment, the backend URL is:
 https://interview-hub-nhmc.onrender.com
 ```
 
-## 4. Ollama Cloud
+## 4. GROQ Setup
 
-Create an Ollama API key and set these Render env vars. For Ollama Cloud direct API access, keep the base URL at `https://ollama.com`; the backend appends `/api/chat`, `/api/embed`, and `/api/tags` itself.
+**GROQ** is the primary AI service for chat, code hints, and interview scoring. It runs in the cloud — no hosting needed.
+
+1. Sign up at [groq.com](https://groq.com) and get an API key
+2. Set these env vars in Render:
+
+```env
+GROQ_API_KEY=gsk_your_groq_api_key
+GROQ_MODEL=llama-3.1-8b-instant
+```
+
+### Status Endpoint
+
+The navbar status indicator checks `GET /api/status` which returns `{"groq": "online"}`. The label shows **"Chatbot"** in the navbar.
+
+### Ollama for Embeddings (Optional)
+
+Ollama is used only for **document embeddings** (vector generation) in RAG mode. Chat and scoring use GROQ. If you have an Ollama host:
 
 ```env
 OLLAMA_BASE_URL=https://ollama.com
-OLLAMA_API_KEY=your-real-ollama-api-key
-CHAT_MODEL=glm-5.1
+OLLAMA_API_KEY=your-ollama-api-key
 EMBED_MODEL=nomic-embed-text
 ```
 
-Check available models with:
+Important: the Prisma schema stores embeddings as `vector(768)`, so use an embedding model that returns 768 dimensions.
 
-```sh
-curl https://ollama.com/api/tags -H "Authorization: Bearer YOUR_OLLAMA_API_KEY"
-```
+If Ollama is not available, document ingestion and RAG search will be disabled but all other features (chat, topics, playground) work normally.
 
-Important: the Prisma schema stores embeddings as `vector(768)`, so use an embedding model that returns 768 dimensions, or update the schema and migration.
+For local development, Ollama is still useful:
 
-For local Ollama instead of Ollama Cloud:
-
-```env
-OLLAMA_BASE_URL=http://localhost:11434
-CHAT_MODEL=llama3
-EMBED_MODEL=nomic-embed-text
-```
-
-And pull models locally:
-
-```sh
-ollama pull llama3
+```bash
 ollama pull nomic-embed-text
 ollama serve
 ```
 
-## 4.1 OAuth Login
+## 5. OAuth Login
 
 OAuth login proves the user controls a real Google or GitHub account. Password signup only validates email format, so disable password auth in production if you do not want made-up email accounts:
 
@@ -262,7 +289,9 @@ FRONTEND_URL=https://YOUR_NETLIFY_SITE.netlify.app
 CORS_ORIGINS=https://YOUR_NETLIFY_SITE.netlify.app
 ```
 
-## 5. Netlify Frontend
+## 6. Netlify Frontend
+
+> **Note:** Your `netlify.toml` already has the correct proxy settings (see below).
 
 Before deploying Netlify, update `netlify.toml` so redirects point to the Render backend:
 
@@ -311,7 +340,7 @@ If Netlify displays the publish directory as `client/dist`, that is also okay wh
 
 No Netlify env vars are required for the current setup. The frontend calls `/api`, and Netlify proxies those requests to Render.
 
-## 6. Final CORS Update
+## 7. Final CORS Update
 
 After Netlify deploys, copy the real Netlify URL:
 
@@ -329,7 +358,52 @@ Then restart or redeploy the Render backend.
 
 Users should open the Netlify URL, not the Render URL. Render is only the backend API.
 
-## 7. Smoke Test
+## 8. Code Playground Deployment
+
+The playground requires Docker to execute code in containers. Since Render's free Node plan has **no Docker daemon**, the server automatically detects this at startup and returns a clear 503 message.
+
+### Option A: Upgrade Render to Docker Web Service ($7/mo)
+
+Run the backend as a Docker Web Service on Render (Starter plan). The `server/Dockerfile` will need Docker-in-Docker (DinD) support:
+
+```dockerfile
+FROM docker:27-dind AS runtime
+RUN apk add --no-cache nodejs npm docker-cli
+WORKDIR /app
+COPY package*.json ./
+COPY prisma ./prisma
+RUN npm ci --omit=dev
+COPY . .
+EXPOSE 5000
+CMD dockerd-entrypoint.sh &>/dev/null & \
+    sleep 3 && \
+    npx prisma migrate deploy && \
+    node index.js
+```
+
+### Option B: Self-Host Piston on Oracle Cloud (Free)
+
+[Piston](https://github.com/engineer-man/piston) is a dedicated code execution API. Deploy it on Oracle's free tier (4 cores, 24GB RAM):
+
+```bash
+# SSH into your Oracle VM, then:
+git clone https://github.com/engineer-man/piston
+cd piston
+docker compose up -d
+```
+
+Then update `dockerService.js` to call your Oracle VM's Piston API instead of Docker.
+
+### Option C: Graceful Fallback (Default)
+
+When Docker is unavailable, the playground:
+- Shows a friendly: *"Code execution is not available on this server."*
+- Returns HTTP 503 with a clear message
+- All other features (chat, topics, profile, admin) work normally
+
+---
+
+## 9. Smoke Test
 
 Open the Netlify URL and test:
 
@@ -358,7 +432,7 @@ https://YOUR_RENDER_APP.onrender.com/health
 https://YOUR_RENDER_APP.onrender.com/api/status
 ```
 
-## 8. Logs
+## 10. Logs
 
 Use these places when something breaks:
 
@@ -387,7 +461,7 @@ Login/chat/API failed -> Browser Network tab + Render logs
 Database query failed -> Render logs + Supabase logs
 ```
 
-## 9. Common Issues
+## 11. Common Issues
 
 ### `Environment variable not found: DATABASE_URL`
 

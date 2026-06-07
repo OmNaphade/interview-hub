@@ -15,7 +15,7 @@ async function pingStatus(req, res) {
 
     res.json({
       status: groqReachable && dbConnected ? "ok" : "degraded",
-      ollama: groqReachable ? "running" : "offline",
+      groq: groqReachable ? "running" : "offline",
       database: dbConnected ? "connected" : "disconnected",
     });
   } catch (error) {

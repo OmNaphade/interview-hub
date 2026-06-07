@@ -12,7 +12,21 @@ This guide will walk you through setting up the entire application locally.
 
 ---
 
-## Step 1: Install & Setup Ollama
+## Step 1: Get GROQ API Key (Primary AI)
+
+**GROQ** powers all chat, code hints, and interview scoring. It runs in the cloud — no local setup needed.
+
+1. Sign up at [groq.com](https://groq.com) — it's free
+2. Generate an API key from the console
+3. You'll add it to `server/.env` in Step 3
+
+> **Why GROQ instead of Ollama for chat?** GROQ provides fast cloud inference (8B parameter model at cloud speeds) vs running Ollama locally on CPU, which is slow. Ollama is kept only for local document embeddings.
+
+---
+
+## Step 2: Install & Setup Ollama (Optional — Embeddings Only)
+
+Ollama is only needed for **document embeddings** (RAG features). If you don't plan to upload documents, you can skip this step.
 
 ### Windows/Mac/Linux
 1. Download Ollama from: https://ollama.ai
@@ -27,10 +41,7 @@ This guide will walk you through setting up the entire application locally.
 Open a terminal and run:
 
 ```bash
-# Pull the main chat model
-ollama pull llama3
-
-# Pull the embedding model
+# Pull the embedding model (required for RAG/document features)
 ollama pull nomic-embed-text
 
 # Start Ollama server
@@ -39,11 +50,11 @@ ollama serve
 
 Keep this terminal running! The server will be available at `http://localhost:11434`
 
-**Note**: First pull may take 10-20 minutes depending on internet speed.
+**Note**: First pull may take 5-10 minutes depending on internet speed.
 
 ---
 
-## Step 2: Setup PostgreSQL
+## Step 3: Setup PostgreSQL
 
 ### Windows
 1. Download PostgreSQL 15+ from: https://www.postgresql.org/download/windows/
@@ -102,7 +113,7 @@ SELECT * FROM pg_extension WHERE extname = 'vector';
 
 ---
 
-## Step 3: Setup Backend Server
+## Step 4: Setup Backend Server
 
 ### Clone and Navigate
 ```bash
@@ -111,15 +122,31 @@ cd server
 
 ### Create Environment File
 
-Create `.env` file in `/server`:
+Create `.env` file in `/server`. Copy from the example:
+
+```bash
+cp .env.example .env
+```
+
+Or create manually:
 
 ```env
 DATABASE_URL="postgresql://postgres:your_password@localhost:5432/interview_app"
-OLLAMA_BASE_URL="http://localhost:11434"
-CHAT_MODEL="llama3"
-EMBED_MODEL="nomic-embed-text"
+
+# GROQ (Primary AI — required for chat)
+GROQ_API_KEY="gsk_your_groq_api_key"
+GROQ_MODEL="llama-3.1-8b-instant"
+
+# Ollama (Optional — for document embeddings only)
+# OLLAMA_BASE_URL="http://localhost:11434"
+# EMBED_MODEL="nomic-embed-text"
+
 PORT=5000
 NODE_ENV="development"
+AUTH_SECRET="at-least-32-random-chars-for-jwt"
+FRONTEND_URL="http://localhost:5173"
+ALLOW_PASSWORD_AUTH=true
+ADMIN_EMAILS="admin@example.com"
 DATAFILES_PATH="./datafiles"
 CHUNK_SIZE=500
 CHUNK_OVERLAP=50
@@ -138,7 +165,7 @@ This installs:
 - Express.js
 - Prisma ORM
 - PostgreSQL driver
-- Document parsing libraries
+- Document parsing libraries (pdf-parse, mammoth, cheerio)
 - Axios for HTTP requests
 
 ### Setup Prisma
@@ -167,8 +194,19 @@ node prisma/seed.js
 You should see:
 ```
 🌱 Seeding database...
-✅ Seeded 60 questions
+✅ Seeded 60+ questions across 12 topics
 ```
+
+### Setup Docker (Optional — for Code Playground)
+
+The code playground requires Docker Desktop to execute code in containers:
+
+1. Download [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+2. Install and start it (ensure the Docker daemon is running)
+3. The server will auto-detect Docker at startup via `docker info`
+4. Docker images are pulled automatically in the background on first run
+
+If Docker is not available, the playground shows a friendly 503 message — all other features work.
 
 ### Start Backend Server
 
@@ -179,7 +217,7 @@ npm run dev
 You should see:
 ```
 🚀 Server running on http://localhost:5000
-📚 Ollama: http://localhost:11434
+✅ Docker available — playground execution enabled (or ⚠️ Docker not available)
 🗄️  Database: ✅
 ```
 
@@ -187,7 +225,7 @@ The backend is now ready! Keep this running in a terminal.
 
 ---
 
-## Step 4: Setup Frontend Client
+## Step 5: Setup Frontend Client
 
 ### In a New Terminal
 
@@ -224,25 +262,36 @@ Local:        http://localhost:5173/
 
 ---
 
-## Step 5: Access the Application
+## Step 6: Access the Application
 
 1. Open browser: `http://localhost:5173`
-2. You should see the Interview Hub dashboard
-3. Click on any topic to explore questions
-4. Go to "Chat" to start chatting with AI
+2. You should see the Login page — create an account or sign in
+3. Dashboard shows 12 topic cards with progress
+4. Go to "Chat" to start chatting with AI (powered by GROQ)
+5. Try the Playground to write and run code (requires Docker)
+6. The navbar shows **"Chatbot"** status indicator — green when GROQ is online
 
 ---
 
 ## Troubleshooting
 
-### "Cannot connect to Ollama"
+### "Cannot connect to GROQ"
 
-**Problem**: Error message about Ollama connection
+**Problem**: Chat returns errors or status shows "Chatbot: Offline"
 
 **Solution**:
-1. Verify `ollama serve` is running in its terminal
-2. Test: `curl http://localhost:11434/api/tags`
-3. If using custom host, update `OLLAMA_BASE_URL` in `.env`
+1. Verify `GROQ_API_KEY` is set in `server/.env`
+2. Check the key at [groq.com](https://groq.com)
+3. The status endpoint returns `{"groq": "online"}` when connected
+
+### "Ollama not available"
+
+**Problem**: Document features don't work
+
+**Solution**:
+1. This is expected if you didn't set up Ollama — GROQ handles chat
+2. For RAG/document features, set `OLLAMA_BASE_URL` and install Ollama
+3. Verify: `ollama serve` is running and `nomic-embed-text` is pulled
 
 ### "Database connection refused"
 
@@ -326,6 +375,25 @@ node prisma/seed.js
    }
    ```
 
+### "Docker not available" in Playground
+
+**Problem**: Playground shows 503 or "not available"
+
+**Solution**:
+1. Ensure Docker Desktop is installed and running
+2. Run `docker info` in terminal to verify
+3. Restart the backend server after Docker is running
+4. Check server startup logs for "✅ Docker available"
+
+### "Question cards don't render correctly"
+
+**Problem**: Cards missing difficulty badges or wrong format
+
+**Solution**:
+1. Questions use template format at `server/data/questions/formatted/`
+2. Re-run the transform script: `node scripts/transform-questions.js`
+3. The old format at `server/data/questions/` is still the source of truth
+
 ---
 
 ## Accessing the Application
@@ -334,23 +402,26 @@ Once everything is running:
 
 **Frontend**: http://localhost:5173
 **Backend API**: http://localhost:5000
-**Ollama**: http://localhost:11434
-**PostgreSQL**: localhost:5432
+**Playground**: http://localhost:5173/playground
+**GROQ API**: cloud (no local URL)
+**Ollama**: http://localhost:11434 (optional, for embeddings)
+**PostgreSQL**: localhost:5432 (or localhost:5433 for Docker pgvector)
 
 ### Default Features Available
 
-✅ Chat with AI (all 5 modes)
-✅ 12 topic dashboards
-✅ Theory questions & answers
+✅ Chat with AI (powered by GROQ, 5 modes)
+✅ 12 topic dashboards with difficulty filtering
+✅ Theory questions & answers (expandable cards)
+✅ Coding challenges with code blocks
+✅ Code Playground with Docker execution (9 languages)
 ✅ Bookmark questions
 ✅ Session management
-
-🔜 Coming Soon:
-- Coding challenges editor
-- Mock interview simulator
-- Document upload & RAG
-- Study roadmap
-- Progress analytics
+✅ User authentication (email, Google, GitHub)
+✅ Admin panel (user/roadmap management)
+✅ Profile settings & password change
+✅ Document upload & RAG (requires Ollama)
+✅ Mock interview simulator with AI scoring
+✅ Dark mode with persistence
 
 ---
 
@@ -392,36 +463,39 @@ psql -U postgres -d interview_app
 
 # Exit
 \q
+
+# Prisma Studio (GUI browser)
+npx prisma studio
 ```
 
 ---
 
 ## Environment Configuration
 
-### Optional: Different Ollama Models
+### GROQ Model Options
 
 Edit `/server/.env`:
 
-**Fast but less accurate:**
+**Default (fast):**
 ```env
-CHAT_MODEL="mistral"
+GROQ_MODEL="llama-3.1-8b-instant"
 ```
 
-**Larger model (requires more RAM):**
+**Larger model (slower, smarter):**
 ```env
-CHAT_MODEL="neural-chat"
+GROQ_MODEL="llama-3.3-70b-versatile"
 ```
 
-**Quantized for speed:**
+**Small model (fastest):**
 ```env
-CHAT_MODEL="orca-mini"
+GROQ_MODEL="llama3-8b-8192"
 ```
 
-### Optional: Remote PostgreSQL
+### Ollama (Optional — for documents only)
 
-Change `DATABASE_URL` to:
 ```env
-DATABASE_URL="postgresql://user:password@host:5432/interview_app"
+OLLAMA_BASE_URL="http://localhost:11434"
+EMBED_MODEL="nomic-embed-text"
 ```
 
 ---
@@ -430,65 +504,35 @@ DATABASE_URL="postgresql://user:password@host:5432/interview_app"
 
 After setup is complete:
 
-1. **Explore the Chat**: Try different modes
-2. **Ingest Documents**: Upload your own materials
-3. **Practice Questions**: Work through different topics
-4. **Try Mock Interview**: (Once implemented)
-5. **Customize**: Add more question topics
-6. **Deploy**: Push to production when ready
+1. **Explore the Chat**: Try all 5 modes (GROQ-powered)
+2. **Code Playground**: Write and run code in 9 languages (needs Docker)
+3. **Practice Questions**: Work through different topics with expandable cards
+4. **Try Mock Interview**: AI-scored interview simulation
+5. **Upload Documents**: Enable RAG mode (requires Ollama)
+6. **Customize**: Add more question topics or edit templates
+7. **Deploy**: Push to production (Netlify + Render)
 
 ---
 
 ## Performance Tips
 
-### Local Machine (Recommended)
-- Minimum: 8GB RAM, 4-core CPU
-- Optimal: 16GB RAM, 8-core CPU, GPU
-
-### Enable GPU (If Available)
-
-**NVIDIA GPU:**
-```bash
-ollama run llama3 --gpu all
-```
-
-**AMD GPU:**
-```bash
-export HIP_DEVICE_ORDER=PCI
-ollama serve
-```
-
-### Database Optimization
-
-After seeding, create indexes:
-```bash
-npx prisma db execute --stdin < optimize.sql
-```
+### Docker Playground
+- Docker Desktop uses significant RAM. Allocate at least 4GB in Docker settings.
+- Images are pulled once on first use, then cached.
+- Container timeouts: 30s for code, 120s for databases.
 
 ---
 
-## Support & Debugging
-
-### Enable Debug Logging
-
-Backend:
-```env
-NODE_ENV="development"
-DEBUG="*"
-```
-
-Frontend (Browser Console):
-```javascript
-localStorage.setItem('DEBUG', '*')
-```
-
-### Check System Status
+## Check System Status
 
 ```bash
 # Backend health
 curl http://localhost:5000/health
 
-# Ollama status
+# GROQ status (returns {"groq": "online"})
+curl http://localhost:5000/api/status
+
+# Ollama status (if installed)
 curl http://localhost:11434/api/tags
 
 # Database
@@ -497,67 +541,11 @@ psql -U postgres -d interview_app -c "SELECT version();"
 
 ---
 
-## Uninstall/Reset
+## Reset Database
 
-### Reset Database
 ```bash
 npx prisma migrate reset  # WARNING: Deletes all data
 ```
-
-### Clear Ollama Models
-```bash
-ollama rm llama3
-ollama rm nomic-embed-text
-```
-
-### Stop Services
-```bash
-# Backend
-Ctrl+C in backend terminal
-
-# Frontend
-Ctrl+C in frontend terminal
-
-# Ollama
-Ctrl+C in Ollama terminal
-
-# PostgreSQL (macOS)
-brew services stop postgresql@15
-```
-
----
-
-## Deployment
-
-### Deploy Backend
-
-**Railway.app** (Easiest)
-1. Push code to GitHub
-2. Connect repository to Railway
-3. Add PostgreSQL add-on
-4. Set environment variables
-5. Deploy!
-
-### Deploy Frontend
-
-**Vercel** (Recommended)
-1. Import project on Vercel
-2. Set build command: `npm run build`
-3. Set output directory: `dist`
-4. Set environment: `VITE_API_URL=https://your-backend.com`
-5. Deploy!
-
----
-
-## Getting Help
-
-If you encounter issues:
-
-1. **Check Logs**: Review terminal output for errors
-2. **Verify Connections**: Test each service independently
-3. **Check Ports**: Ensure 5000, 5173, 5432 are available
-4. **Review .env**: Make sure all variables are set correctly
-5. **Restart Services**: Sometimes helps with connection issues
 
 ---
 

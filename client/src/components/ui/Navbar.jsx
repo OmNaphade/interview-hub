@@ -9,7 +9,7 @@ const Navbar = () => {
   const { darkMode, toggleDarkMode, toggleSidebar } = useUIStore()
   const { user, clearUser } = useAuthStore()
   const navigate = useNavigate()
-  const [status, setStatus] = useState({ ollama: 'checking', database: 'checking' })
+  const [status, setStatus] = useState({ groq: 'checking', database: 'checking' })
 
   useEffect(() => {
     const checkStatus = async () => {
@@ -17,7 +17,7 @@ const Navbar = () => {
         const res = await statusAPI.ping()
         setStatus(res.data)
       } catch (error) {
-        setStatus({ ollama: 'offline', database: 'offline' })
+        setStatus({ groq: 'offline', database: 'offline' })
       }
     }
 
@@ -31,7 +31,7 @@ const Navbar = () => {
       await authAPI.logout()
     } finally {
       clearUser()
-      navigate('/')
+      navigate('/dashboard')
     }
   }
 
@@ -53,9 +53,9 @@ const Navbar = () => {
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1">
               <div className={`w-3 h-3 rounded-full ${
-                status.ollama === 'running' ? 'bg-green-500' : 'bg-red-500'
+                status.groq === 'running' ? 'bg-green-500' : 'bg-red-500'
               }`} />
-              <span className="text-sm">Ollama</span>
+              <span className="text-sm">Chatbot</span>
             </div>
             <div className="flex items-center gap-1">
               <div className={`w-3 h-3 rounded-full ${

@@ -2,52 +2,43 @@
 
 ## 📋 Checklist Before Starting
 
-- [ ] Ollama installed and running: `ollama serve`
+- [ ] GROQ API key (from [groq.com](https://groq.com)) — required for chat
 - [ ] PostgreSQL with pgvector installed, or Docker Desktop running
 - [ ] Node.js 16+ installed
+- [ ] Docker Desktop (optional, for playground code execution)
+- [ ] Ollama installed (optional, for document embeddings)
 - [ ] Code editor open with project
 
 ---
 
 ## 🚀 Launch in 3 Commands
 
-### Terminal 1: Ollama (Keep Running)
-```bash
-ollama serve
-```
-Wait for: "Listening on 127.0.0.1:11434"
-
-### Terminal 2: Backend
+### Terminal 1: Backend
 ```bash
 cd server
 cp .env.example .env
-# Edit .env with your PostgreSQL password
+# Edit .env: set GROQ_API_KEY, DATABASE_URL
 npm install
 npx prisma migrate dev --name init
 npm run dev
 ```
 Wait for: "🚀 Server running on http://localhost:5000"
 
-If PostgreSQL says `extension "vector" is not available`, start the bundled
-pgvector database:
-
-```bash
-docker compose up -d postgres
-```
-
-Then use this database URL in `server/.env`:
-
-```env
-DATABASE_URL="postgresql://om_2026:postgres@localhost:5433/interviewdb"
-```
-
-### Terminal 3: Frontend
+### Terminal 2: Frontend
 ```bash
 cd client
 npm install
 npm run dev
 ```
 Wait for: "Local: http://localhost:5173"
+
+### Terminal 3 (Optional): Docker for Playground
+If you want code execution in the playground:
+1. Start [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+2. Restart the backend — it auto-detects Docker at startup
+3. Server logs show: ✅ "Docker available — playground execution enabled"
+
+> **No Docker?** The playground returns a clear 503 message. All other features work.
 
 ---
 
@@ -57,7 +48,9 @@ Wait for: "Local: http://localhost:5173"
 |---------|-----|---------|
 | Frontend | http://localhost:5173 | Web app |
 | Backend API | http://localhost:5000 | API endpoints |
-| Ollama | http://localhost:11434 | LLM service |
+| Playground | http://localhost:5173/playground | Code execution |
+| GROQ | cloud | AI chat (no local URL) |
+| Ollama | http://localhost:11434 | Embeddings (optional) |
 | PG Admin | localhost:5432 or localhost:5433 | Database |
 
 ---
@@ -65,7 +58,7 @@ Wait for: "Local: http://localhost:5173"
 ## 📁 Key Files to Know
 
 **Backend Config:**
-- `server/.env` - Environment variables
+- `server/.env` - Environment variables (GROQ_API_KEY, DATABASE_URL, etc.)
 - `server/config.js` - App configuration
 - `server/prisma/schema.prisma` - Database schema
 
@@ -75,7 +68,9 @@ Wait for: "Local: http://localhost:5173"
 - `client/src/services/api.js` - API client
 
 **Question Data:**
-- `server/data/questions/` - 12 topic folders
+- `server/data/questions/` - 12 topic folders (source of truth)
+- `server/data/questions/formatted/` - Template-formatted versions
+- `server/data/templates/` - Card template JSON files
 
 ---
 
@@ -85,10 +80,12 @@ Wait for: "Local: http://localhost:5173"
 1. Edit `server/data/questions/[topic].json`
 2. Run: `node prisma/seed.js`
 
-### Change Chat Model
+### Change GROQ Model
 Edit `server/.env`:
 ```env
-CHAT_MODEL="mistral"  # or "neural-chat", "orca-mini"
+GROQ_MODEL="llama-3.1-8b-instant"  # fast default
+# GROQ_MODEL="llama-3.3-70b-versatile"  # slower, smarter
+# GROQ_MODEL="llama3-8b-8192"  # fastest
 ```
 
 ### View Database
@@ -99,6 +96,7 @@ npx prisma studio
 ### Check API Health
 ```bash
 curl http://localhost:5000/health
+curl http://localhost:5000/api/status  # returns {"groq": "online"}
 ```
 
 ---
@@ -107,31 +105,34 @@ curl http://localhost:5000/health
 
 | Issue | Solution |
 |-------|----------|
-| "Cannot connect to Ollama" | `ollama serve` not running |
+| "GROQ not available" | Set `GROQ_API_KEY` in `server/.env` |
+| "Chatbot: Offline" in navbar | GROQ key missing or invalid |
 | "Database connection refused" | Check DATABASE_URL in .env |
 | "Port already in use" | Change PORT in .env |
-| "Models not found" | Run `ollama pull llama3` |
-| "pgvector error" | Run `docker compose up -d postgres`, then use `localhost:5433` in `DATABASE_URL` |
+| "Playground not available" | Start Docker Desktop and restart backend |
+| "pgvector error" | Run `docker compose up -d postgres`, use `localhost:5433` |
 
 ---
 
 ## 📊 What's Implemented
 
-✅ AI Chat with 5 modes
-✅ Real-time streaming
-✅ 60+ questions (12 topics)
-✅ Dark mode
+✅ AI Chat with 5 modes (powered by GROQ)
+✅ Real-time streaming SSE
+✅ 60+ questions across 12 topics
+✅ Code Playground with Docker (9 languages)
+✅ User authentication (email, Google, GitHub)
+✅ Admin panel (users, questions, roadmap)
+✅ Profile management & password change
+✅ Coding cards with difficulty badges
+✅ Theory cards with expandable answers
+✅ Dark mode with persistence
 ✅ Session management
-✅ Code syntax highlighting
-✅ Database + ORM
-✅ Vector search ready
+✅ Code syntax highlighting (Monaco Editor)
+✅ Document upload & RAG (requires Ollama)
+✅ Mock interview with AI scoring
 ✅ Responsive design
-✅ Status indicators
-
-🔜 Coding challenges
-🔜 Mock interviews
-🔜 Study roadmap
-🔜 Document upload
+✅ Status indicators (Chatbot, Database)
+✅ Docker availability auto-detection
 
 ---
 
@@ -142,121 +143,27 @@ interview-hub/
 ├── server/              (Express backend)
 │   ├── routes/
 │   ├── controllers/
-│   ├── services/
+│   ├── services/        (groqService, dockerService, ollamaService, etc.)
 │   ├── prisma/
 │   └── data/questions/
 ├── client/              (React frontend)
 │   └── src/
 │       ├── components/
-│       ├── pages/
+│       ├── pages/       (Login, Dashboard, Chat, Topic, Profile, Admin, Playground)
 │       ├── store/
 │       ├── hooks/
 │       └── services/
 ├── README.md            (Full guide)
 ├── SETUP.md             (Step-by-step)
+├── DEPLOYMENT.md        (Production deployment)
 └── BUILD_SUMMARY.md     (What's built)
 ```
 
 ---
 
-## 📚 Documentation
-
-- **README.md** - Complete project overview
-- **SETUP.md** - Detailed setup guide
-- **BUILD_SUMMARY.md** - What was built
-- **This file** - Quick reference
-
----
-
-## 🎓 First Things to Try
-
-1. Start all 3 services
-2. Go to http://localhost:5173
-3. Click a topic in Dashboard
-4. Go to Chat tab
-5. Try different chat modes:
-   - 💬 General - Ask anything
-   - 💻 Code - Code help
-   - 🎯 Interview - Interview prep
-   - 📝 ELI5 - Simple explanations
-
----
-
-## 💾 Database Commands
-
-```bash
-# Connect to database
-psql -U postgres -d interview_app
-
-# View tables
-\dt
-
-# View schema
-\d Message
-
-# View data
-SELECT * FROM "Question" LIMIT 5;
-
-# Exit
-\q
-```
-
----
-
-## 🔑 Default Credentials
-
-**PostgreSQL:**
-- Username: `postgres`
-- Password: (your choice during install)
-- Database: `interview_app`
-
-**Ollama:**
-- No credentials needed
-- Models: llama3, nomic-embed-text
-
----
-
-## ⚡ Performance Tips
-
-- Use GPU if available: `ollama pull llama3:gpu`
-- 16GB RAM recommended
-- Disable animations on slow machines
-- Use mistral model for speed
-
----
-
-## 🚀 Next Steps
-
-1. ✅ Get everything running
-2. ✅ Explore chat features
-3. ✅ Try different topics
-4. ✅ Upload your own documents
-5. ✅ Customize questions
-6. ✅ Deploy to production
-
----
-
-## 📞 Support
-
-- Check logs in terminal
-- Read README.md for details
-- Review SETUP.md for setup help
-- Check BUILD_SUMMARY.md for architecture
-
----
-
-## 💡 Did You Know?
-
-- Everything runs locally (privacy!)
-- No API keys needed
-- Works offline (after setup)
-- Fully customizable
-- Ready for production
-- Great for learning
-
----
-
-**Ready to prepare for your interview? Start chatting! 🎉**
-
-For detailed instructions, see `SETUP.md`
-For architecture details, see `BUILD_SUMMARY.md`
+First things to try:
+1. Start the backend and frontend
+2. Go to http://localhost:5173 and create an account
+3. Click a topic in Dashboard to see theory/coding cards
+4. Go to Chat and try different modes
+5. Try the Playground with JavaScript: `console.log("Hello!");`

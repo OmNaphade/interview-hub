@@ -20,3 +20,6 @@ datafiles/docs/
 datafiles/links/
 datafiles/processed/
 prisma/migrations/
+*.md
+!README.md
+data/
