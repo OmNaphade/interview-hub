@@ -1,0 +1,209 @@
+[
+  {
+    "topic": "networking",
+    "questionText": "What is DNS? What is it used for?",
+    "answerText": "DNS (Domain Name Systems) is a protocol used for converting domain names into IP addresses.\ncomputer networking (at layer 3 of the OSP model) is done with IP addresses but for as humans it's hard to remember IP addresses, it's much easier to remember names. This why we need something such as DNS to convert any domain name we type into an IP address. You can think on DNS as a huge phonebook or database where each corresponding name has an IP.",
+    "difficulty": "easy",
+    "type": "theory",
+    "source": "extracted",
+    "id": "networking_extracted_3373"
+  },
+  {
+    "topic": "networking",
+    "questionText": "What is DNS resolution?",
+    "answerText": "The process of translating IP addresses to domain names.",
+    "difficulty": "easy",
+    "type": "theory",
+    "source": "extracted",
+    "id": "networking_extracted_3374"
+  },
+  {
+    "topic": "networking",
+    "questionText": "What is a name server?",
+    "answerText": "A server which is responsible for resolving DNS queries.",
+    "difficulty": "easy",
+    "type": "theory",
+    "source": "extracted",
+    "id": "networking_extracted_3375"
+  },
+  {
+    "topic": "networking",
+    "questionText": "What is the resolution sequence of: www.site.com",
+    "answerText": "It's resolved in this order:\n\n1) .\n2) .com\n3) site.com\n4) www.site.com",
+    "difficulty": "easy",
+    "type": "theory",
+    "source": "extracted",
+    "id": "networking_extracted_3376"
+  },
+  {
+    "topic": "networking",
+    "questionText": "What is a domain name registrar?",
+    "answerText": "Cloudflare: \"A domain name registrar provides domain name registrations to the general public. A common misconception is that registrars sell domain names; these domain names are actually owned by registries and can only be leased by users.\"",
+    "difficulty": "easy",
+    "type": "theory",
+    "source": "extracted",
+    "id": "networking_extracted_3377"
+  },
+  {
+    "topic": "networking",
+    "questionText": "Given the following fqdn, www.blipblop.com, what is the root?",
+    "answerText": ". is the root",
+    "difficulty": "easy",
+    "type": "theory",
+    "source": "extracted",
+    "id": "networking_extracted_3378"
+  },
+  {
+    "topic": "networking",
+    "questionText": "Given the following fqdn, www.blipblop.com, what is the top level domain?",
+    "answerText": ".com. is the top level domain",
+    "difficulty": "easy",
+    "type": "theory",
+    "source": "extracted",
+    "id": "networking_extracted_3379"
+  },
+  {
+    "topic": "networking",
+    "questionText": "Given the following fqdn, www.blipblop.com, what is the second level domain?",
+    "answerText": "blipblop.com. is the second level domain",
+    "difficulty": "easy",
+    "type": "theory",
+    "source": "extracted",
+    "id": "networking_extracted_3380"
+  },
+  {
+    "topic": "networking",
+    "questionText": "Given the following fqdn, www.blipblop.com, what is the domain?",
+    "answerText": "www.blipblop.com. is the domain",
+    "difficulty": "easy",
+    "type": "theory",
+    "source": "extracted",
+    "id": "networking_extracted_3381"
+  },
+  {
+    "topic": "networking",
+    "questionText": "Describe DNS resolution workflow in high-level",
+    "answerText": "In general the process is as follows:\n\n   The user types an address in the web browser (somesite.com)\n   The operating system gets a request from the browser to translate the address the user entered\n   A query created to check if a local entry of the address exists in the system. In case it doesn't, the request is forwarded to the DNS resolver\n   The Resolver is a server, usually configured by your ISP when you connect to the internet, that responsible for resolving your query by contacting other DNS servers\n   The Resolver contacts the root nameserver (aka as .)\n   The root nameserver either responds with the address you are looking for or it responds with the address of the relevant Top Level Domain DNS server (if your address ends with org then the org TLD)\n   The Resolver then contacts the TLD DNS. TLD DNS might respond with the address you are looking for. If it doesn't has the information, it will provide the address of SLD DNS server\n   SLD DNS server will reply with the address to the resolver\n   The Resolver passes this information to the browser while your OS also stores this information in the cache\n  * The user cab browse the website with happiness and joy :D",
+    "difficulty": "medium",
+    "type": "theory",
+    "source": "extracted",
+    "id": "networking_extracted_3382"
+  },
+  {
+    "topic": "networking",
+    "questionText": "What is a DNS record?",
+    "answerText": "A mapping between domain name and an IP address.",
+    "difficulty": "easy",
+    "type": "theory",
+    "source": "extracted",
+    "id": "networking_extracted_3383"
+  },
+  {
+    "topic": "networking",
+    "questionText": "What types of DNS records are there?",
+    "answerText": "A\n   CNAME\n   PTR\n   MX\n  * AAAA\n  ...\n\nA more detailed list, can be found here",
+    "difficulty": "medium",
+    "type": "theory",
+    "source": "extracted",
+    "id": "networking_extracted_3384"
+  },
+  {
+    "topic": "networking",
+    "questionText": "What is a A record?",
+    "answerText": "A (Address): Maps a host name to an IPv4 address.\n\nWhen a computer has multiple adapter cards and IP addresses, it should have multiple address records.",
+    "difficulty": "easy",
+    "type": "theory",
+    "source": "extracted",
+    "id": "networking_extracted_3385"
+  },
+  {
+    "topic": "networking",
+    "questionText": "What is a AAAA record?",
+    "answerText": "An AAAA Record performs the same function as an A Record, but for an IPv6 Address.",
+    "difficulty": "easy",
+    "type": "theory",
+    "source": "extracted",
+    "id": "networking_extracted_3386"
+  },
+  {
+    "topic": "networking",
+    "questionText": "What is a CNAME record?",
+    "answerText": "CNAME: maps a hostname to another hostname.\n\nThe target should be a domain name which must have an A or AAAA record. Think of it as an alias record.",
+    "difficulty": "easy",
+    "type": "theory",
+    "source": "extracted",
+    "id": "networking_extracted_3387"
+  },
+  {
+    "topic": "networking",
+    "questionText": "What is a PTR record?",
+    "answerText": "While an A record points a domain name to an IP address, a PTR record does the opposite and resolves the IP address to a domain name.",
+    "difficulty": "easy",
+    "type": "theory",
+    "source": "extracted",
+    "id": "networking_extracted_3388"
+  },
+  {
+    "topic": "networking",
+    "questionText": "What is a MX record?",
+    "answerText": "MX (Mail Exchange) Specifies a mail exchange server for the domain, which allows mail to be delivered to the correct mail servers in the domain.",
+    "difficulty": "easy",
+    "type": "theory",
+    "source": "extracted",
+    "id": "networking_extracted_3389"
+  },
+  {
+    "topic": "networking",
+    "questionText": "What is a NS record?",
+    "answerText": "NS: name servers that can respond to DNS queries",
+    "difficulty": "easy",
+    "type": "theory",
+    "source": "extracted",
+    "id": "networking_extracted_3390"
+  },
+  {
+    "topic": "networking",
+    "questionText": "Explain DNS Records TTL",
+    "answerText": "varonis.com: \"DNS TTL (time to live) is a setting that tells the DNS resolver how long to cache a query before requesting a new one. The information gathered is then stored in the cache of the recursive or local resolver for the TTL before it reaches back out to collect new, updated details.\"",
+    "difficulty": "medium",
+    "type": "theory",
+    "source": "extracted",
+    "id": "networking_extracted_3391"
+  },
+  {
+    "topic": "networking",
+    "questionText": "Is DNS using TCP or UDP?",
+    "answerText": "DNS uses UDP port 53 for resolving queries either regular or reverse. DNS uses TCP for zone transfer.",
+    "difficulty": "medium",
+    "type": "theory",
+    "source": "extracted",
+    "id": "networking_extracted_3392"
+  },
+  {
+    "topic": "networking",
+    "questionText": "Which techniques a DNS can use for load balancing?",
+    "answerText": "There are several techniques that a DNS can use for load balancing, including:\n\n Round-robin DNS\n\n Weighted round-robin DNS\n\n Least connections\n\n GeoDNS",
+    "difficulty": "medium",
+    "type": "theory",
+    "source": "extracted",
+    "id": "networking_extracted_3393"
+  },
+  {
+    "topic": "networking",
+    "questionText": "What is a DNS zone?",
+    "answerText": "A DNS zone is a logical container that holds all the DNS resource records for a specific domain name.",
+    "difficulty": "easy",
+    "type": "theory",
+    "source": "extracted",
+    "id": "networking_extracted_3394"
+  },
+  {
+    "topic": "networking",
+    "questionText": "What types of zones are there?",
+    "answerText": "There are several types, including:\n\n Primary zone: A primary zone is a read/write zone that is stored in a master DNS server.\n\n Secondary zone: A secondary zone is a read-only copy of a primary zone that is stored in a slave DNS server. \n\n* Stub zone: A stub zone is a type of zone that contains only the essential information about a domain name. It is used to reduce the amount of DNS traffic and improve the efficiency of the DNS resolution process.",
+    "difficulty": "medium",
+    "type": "theory",
+    "source": "extracted",
+    "id": "networking_extracted_3395"
+  }
+]

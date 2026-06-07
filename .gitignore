@@ -22,4 +22,4 @@ datafiles/processed/
 prisma/migrations/
 *.md
 !README.md
-data/
+/data/

@@ -1,0 +1,110 @@
+[
+  {
+    "topic": "system_design",
+    "questionText": "uest related to a problem? Please describe.**",
+    "answerText": "clear and concise description of what the problem is. -->\n\nDescribe the solution you'd like\n\n\n\nAdditional context\n\n<!-- Add any other context or screenshots about the feature re",
+    "difficulty": "medium",
+    "type": "theory",
+    "source": "extracted",
+    "id": "system_design_extracted_4381"
+  },
+  {
+    "topic": "system_design",
+    "questionText": "uences for any action they deem in violation of this Code of Conduct:",
+    "answerText": "ct: Use of inappropriate language or other behavior deemed\nunprofessional or unwelcome in the community.\n\nConse",
+    "difficulty": "medium",
+    "type": "theory",
+    "source": "extracted",
+    "id": "system_design_extracted_4382"
+  },
+  {
+    "topic": "system_design",
+    "questionText": "uence**: A private, written warning from community leaders, providing",
+    "answerText": "rity around the nature of the violation and an explanation of why the\nbehavior was inappropriate. A public apology may be re",
+    "difficulty": "medium",
+    "type": "theory",
+    "source": "extracted",
+    "id": "system_design_extracted_4383"
+  },
+  {
+    "topic": "system_design",
+    "questionText": "uested.",
+    "answerText": "rning\n\nCommunity Impact: A violation through a single incident or series\nof actions.\n\n**Conse",
+    "difficulty": "medium",
+    "type": "theory",
+    "source": "extracted",
+    "id": "system_design_extracted_4384"
+  },
+  {
+    "topic": "system_design",
+    "questionText": "uence**: A warning with consequences for continued behavior. No",
+    "answerText": "ction with the people involved, including unsolicited interaction with\nthose enforcing the Code of Conduct, for a specified period of time. This\nincludes avoiding interactions in community spaces as well as external channels\nlike social media. Violating these terms may lead to a temporary or\npermanent ban.\n\n3. Temporary Ban\n\nCommunity Impact: A serious violation of community standards, including\nsustained inappropriate behavior.\n\n**Conse",
+    "difficulty": "medium",
+    "type": "theory",
+    "source": "extracted",
+    "id": "system_design_extracted_4385"
+  },
+  {
+    "topic": "system_design",
+    "questionText": "uence**: A temporary ban from any sort of interaction or public",
+    "answerText": "tion with the community for a specified period of time. No public or\nprivate interaction with the people involved, including unsolicited interaction\nwith those enforcing the Code of Conduct, is allowed during this period.\nViolating these terms may lead to a permanent ban.\n\n4. Permanent Ban\n\nCommunity Impact: Demonstrating a pattern of violation of community\nstandards, including sustained inappropriate behavior, harassment of an\nindividual, or aggression toward or disparagement of classes of individuals.\n\n**Conse",
+    "difficulty": "medium",
+    "type": "theory",
+    "source": "extracted",
+    "id": "system_design_extracted_4386"
+  },
+  {
+    "topic": "system_design",
+    "questionText": "uence**: A permanent ban from any sort of public interaction within",
+    "answerText": "ttribution\n\nThis Code of Conduct is adapted from the [Contributor Covenant][homepage],\nversion 2.0, available at\nhttps://www.contributor-covenant.org/version/2/0/codeofconduct.html.\n\nCommunity Impact Guidelines were inspired by Mozilla's code of conduct\nenforcement ladder.\n\n[homepage]: https://www.contributor-covenant.org\n\nFor answers to common",
+    "difficulty": "medium",
+    "type": "theory",
+    "source": "extracted",
+    "id": "system_design_extracted_4387"
+  },
+  {
+    "topic": "system_design",
+    "questionText": ". Translations are available at",
+    "answerText": "nt.org/translations.",
+    "difficulty": "medium",
+    "type": "theory",
+    "source": "extracted",
+    "id": "system_design_extracted_4388"
+  },
+  {
+    "topic": "system_design",
+    "questionText": "uality of this content by submitting PRs for improvements to code snippets, explanations, etc. If there's any doubt, open an issue to ask about it before submitting a PR.",
+    "answerText": "gree that you're giving me a non-exclusive license to use that content, as I (and my publisher) deem appropriate. You probably guessed that already, but I just have to make sure the lawyers are happy by explicitly stating it.",
+    "difficulty": "medium",
+    "type": "theory",
+    "source": "extracted",
+    "id": "system_design_extracted_4389"
+  },
+  {
+    "topic": "system_design",
+    "questionText": "uery Types",
+    "answerText": "There are three types of queries in a DNS system:\n\nRecursive\n\nIn a recursive query, a DNS client requires that a DNS server (typically a DNS recursive resolver) will respond to the client with either the requested resource record or an error message if the resolver can't find the record.\n\nIterative\n\nIn an iterative query, a DNS client provides a hostname, and the DNS Resolver returns the best answer it can. If the DNS resolver has the relevant DNS records in its cache, it returns them. If not, it refers the DNS client to the Root Server or another Authoritative Name Server that is nearest to the required DNS zone. The DNS client must then repeat the query directly against the DNS server it was referred.\n\nNon-recursive\n\nA non-recursive query is a query in which the DNS Resolver already knows the answer. It either immediately returns a DNS record because it already stores it in a local cache, or queries a DNS Name Server which is authoritative for the record, meaning it definitely holds the correct IP for that hostname. In both cases, there is no need for additional rounds of queries (like in recursive or iterative queries). Rather, a response is immediately returned to the client.\n\nRecord Types\n\nDNS records (aka zone files) are instructions that live in authoritative DNS servers and provide information about a domain including what IP address is associated with that domain and how to handle requests for that domain.\n\nThese records consist of a series of text files written in what is known as DNS syntax. DNS syntax is just a string of characters used as commands that tell the DNS server what to do. All DNS records also have a \"TTL\", which stands for time-to-live, and indicates how often a DNS server will refresh that record.\n\nThere are more record types but for now, let's look at some of the most commonly used ones:\n\n- A (Address record): This is the record that holds the IP address of a domain.\n- AAAA (IP Version 6 Address record): The reco",
+    "difficulty": "easy",
+    "type": "theory",
+    "source": "extracted",
+    "id": "system_design_extracted_4390"
+  },
+  {
+    "topic": "system_design",
+    "questionText": "uerying",
+    "answerText": "SQL databases use SQL (structured query language) for defining and manipulating the data, which is very powerful.\n\nIn a NoSQL database, queries are focused on a collection of documents. Different databases have different syntax for querying.\n\nScalability\n\nIn most common situations, SQL databases are vertically scalable, which can get very expensive. It is possible to scale a relational database across multiple servers, but this is a challenging and time-consuming process.\n\nOn the other hand, NoSQL databases are horizontally scalable, meaning we can add more servers easily to our NoSQL database infrastructure to handle large traffic. Any cheap commodity hardware or cloud instances can host NoSQL databases, thus making it a lot more cost-effective than vertical scaling. A lot of NoSQL technologies also distribute data across servers automatically.\n\nReliability\n\nThe vast majority of relational databases are ACID compliant. So, when it comes to data reliability and a safe guarantee of performing transactions, SQL databases are still the better bet.\n\nMost of the NoSQL solutions sacrifice ACID compliance for performance and scalability.\n\nReasons\n\nAs always we should always pick the technology that fits the requirements better. So, let's look at some reasons for picking SQL or NoSQL based database:\n\nFor SQL\n\n- Structured data with strict schema\n- Relational data\n- Need for complex joins\n- Transactions\n- Lookups by index are very fast\n\nFor NoSQL\n\n- Dynamic or flexible schema\n- Non-relational data\n- No need for complex joins\n- Very data-intensive workload\n- Very high throughput for IOPS\n\nDatabase Replication\n\nReplication is a process that involves sharing information to ensure consistency between redundant resources such as multiple databases, to improve reliability, fault-tolerance, or accessibility.\n\nMaster-Slave Replication\n\nThe master serves reads and writes, replicating writes to one or more slaves, which serve only reads. Slaves can also replica",
+    "difficulty": "hard",
+    "type": "theory",
+    "source": "extracted",
+    "id": "system_design_extracted_4391"
+  },
+  {
+    "topic": "system_design",
+    "questionText": "uadtrees",
+    "answerText": "quadtree is a tree data structure in which each internal node has exactly four children. They are often used to partition a two-dimensional space by recursively subdividing it into four quadrants or regions. Each child or leaf node stores spatial information. Quadtrees are the two-dimensional analog of Octrees which are used to partition three-dimensional space.\n\n!quadtree\n\nTypes of Quadtrees\n\nQuadtrees may be classified according to the type of data they represent, including areas, points, lines, and curves. The following are common types of quadtrees:\n\n- Point quadtrees\n- Point-region (PR) quadtrees\n- Polygonal map (PM) quadtrees\n- Compressed quadtrees\n- Edge quadtrees\n\nWhy do we need Quadtrees?\n\nAren't latitudes and longitudes enough? Why do we need quadtrees? While in theory using latitude and longitude we can determine things such as how close points are to each other using euclidean distance, for practical use cases it is simply not scalable because of its CPU-intensive nature with large data sets.\n\n!quadtree-subdivision\n\nQuadtrees enable us to search points within a two-dimensional range efficiently, where those points are defined as latitude/longitude coordinates or as cartesian (x, y) coordinates. Additionally, we can save further computation by only subdividing a node after a certain threshold. And with the application of mapping algorithms such as the Hilbert curve, we can easily improve range query performance.\n\nUse cases\n\nBelow are some common uses of quadtrees:\n\n- Image representation,",
+    "difficulty": "medium",
+    "type": "theory",
+    "source": "extracted",
+    "id": "system_design_extracted_4392"
+  }
+]

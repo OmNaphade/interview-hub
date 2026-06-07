@@ -1,0 +1,155 @@
+[
+  {
+    "topic": "dbms",
+    "questionText": "What type of databases are you familiar with?",
+    "answerText": "Relational (SQL)\nNoSQL\nTime series",
+    "difficulty": "medium",
+    "type": "theory",
+    "source": "extracted",
+    "id": "dbms_extracted_3299"
+  },
+  {
+    "topic": "dbms",
+    "questionText": "What is a relational database?",
+    "answerText": "Data Storage: system to store data in tables\n   SQL: programming language to manage relational databases\n  * Data Definition Language: a standard syntax to create, alter and delete tables",
+    "difficulty": "easy",
+    "type": "theory",
+    "source": "extracted",
+    "id": "dbms_extracted_3300"
+  },
+  {
+    "topic": "dbms",
+    "questionText": "What does it mean when a database is ACID compliant?",
+    "answerText": "ACID stands for Atomicity, Consistency, Isolation, Durability. In order to be ACID compliant, the database must meet each of the four criteria\n\nAtomicity - When a change occurs to the database, it should either succeed or fail as a whole.\n\nFor example, if you were to update a table, the update should completely execute. If it only partially executes, the\nupdate is considered failed as a whole, and will not go through - the DB will revert back to it's original\nstate before the update occurred. It should also be mentioned that Atomicity ensures that each\ntransaction is completed as it's own stand alone \"unit\" - if any part fails, the whole statement fails.\n\nConsistency - any change made to the database should bring it from one valid state into the next.\n\nFor example, if you make a change to the DB, it shouldn't corrupt it. Consistency is upheld by checks and constraints that\nare pre-defined in the DB. For example, if you tried to change a value from a string to an int when the column\nshould be of datatype string, a consistent DB would not allow this transaction to go through, and the action would\nnot be executed\n\nIsolation - this ensures that a database will never be seen \"mid-update\" - as multiple transactions are running at\nthe same time, it should still leave the DB in the same state as if the transactions were being run sequentially.\n\nFor example, let's say that 20 other people were making changes to the database at the same time. At the\ntime you executed your query, 15 of the 20 changes had gone through, but 5 were still in progress. You should\nonly see the 15 changes that had completed - you wouldn't see the database mid-update as the change goes through.\n\nDurability - Once a change is committed, it will remain committed regardless of what happens\n(power failure, system crash, etc.). This means that all completed transactions\nmust be recorded in non-volatile memory.\n\nNote that SQL is by nature ACID compliant. Certain NoSQL DB's can be ACID compli",
+    "difficulty": "medium",
+    "type": "theory",
+    "source": "extracted",
+    "id": "dbms_extracted_3301"
+  },
+  {
+    "topic": "dbms",
+    "questionText": "What is sharding?",
+    "answerText": "Sharding is a horizontal partitioning.\n\nAre you able to explain what is it good for?",
+    "difficulty": "easy",
+    "type": "theory",
+    "source": "extracted",
+    "id": "dbms_extracted_3302"
+  },
+  {
+    "topic": "dbms",
+    "questionText": "You find out your database became a bottleneck and users experience issues accessing data. How can you deal with such situation?",
+    "answerText": "Not much information provided as to why it became a bottleneck and what is current architecture, so one general approach could be\nto reduce the load on your database by moving frequently-accessed data to in-memory structure.",
+    "difficulty": "easy",
+    "type": "theory",
+    "source": "extracted",
+    "id": "dbms_extracted_3303"
+  },
+  {
+    "topic": "dbms",
+    "questionText": "What is a connection pool?",
+    "answerText": "Connection Pool is a cache of database connections and the reason it's used is to avoid an overhead of establishing a connection for every query done to a database.",
+    "difficulty": "easy",
+    "type": "theory",
+    "source": "extracted",
+    "id": "dbms_extracted_3304"
+  },
+  {
+    "topic": "dbms",
+    "questionText": "What is a connection leak?",
+    "answerText": "A connection leak is a situation where database connection isn't closed after being created and is no longer needed.",
+    "difficulty": "easy",
+    "type": "theory",
+    "source": "extracted",
+    "id": "dbms_extracted_3305"
+  },
+  {
+    "topic": "dbms",
+    "questionText": "Your database performs slowly than usual. More specifically, your queries are taking a lot of time. What would you do?",
+    "answerText": "Query for running queries and cancel the irrelevant queries\n Check for connection leaks (query for running connections and include their IP)\n* Check for table locks and kill irrelevant locking sessions",
+    "difficulty": "medium",
+    "type": "theory",
+    "source": "extracted",
+    "id": "dbms_extracted_3306"
+  },
+  {
+    "topic": "dbms",
+    "questionText": "What is a Data Warehouse?",
+    "answerText": "\"A data warehouse is a subject-oriented, integrated, time-variant and non-volatile collection of data in support of organisation's decision-making process\"",
+    "difficulty": "easy",
+    "type": "theory",
+    "source": "extracted",
+    "id": "dbms_extracted_3307"
+  },
+  {
+    "topic": "dbms",
+    "questionText": "What is an index in a database?",
+    "answerText": "A database index is a data structure that improves the speed of operations in a table. Indexes can be created using one or more columns, providing the basis for both rapid random lookups and efficient ordering of access to records.",
+    "difficulty": "easy",
+    "type": "theory",
+    "source": "extracted",
+    "id": "dbms_extracted_3308"
+  },
+  {
+    "topic": "dbms",
+    "questionText": "Explain Normalization",
+    "answerText": "Data that is used multiple times in a database should be stored once and referenced with a foreign key.\nThis has the clear benefit of ease of maintenance where you need to change a value only in a single place to change it everywhere.",
+    "difficulty": "medium",
+    "type": "theory",
+    "source": "extracted",
+    "id": "dbms_extracted_3309"
+  },
+  {
+    "topic": "dbms",
+    "questionText": "Explain Primary Key and Foreign Key",
+    "answerText": "Primary Key: each row in every table should a unique identifier that represents the row.\nForeign Key: a reference to another table's primary key. This allows you to join table together to retrieve all the information you need without duplicating data.",
+    "difficulty": "medium",
+    "type": "theory",
+    "source": "extracted",
+    "id": "dbms_extracted_3310"
+  },
+  {
+    "topic": "dbms",
+    "questionText": "What types of data tables have you used?",
+    "answerText": "Primary data table: main data you care about\n   Details table: includes a foreign key and has one to many relationship\n   Lookup values table: can be one table per lookup or a table containing all the lookups and has one to many relationship\n   Multi reference table",
+    "difficulty": "medium",
+    "type": "theory",
+    "source": "extracted",
+    "id": "dbms_extracted_3311"
+  },
+  {
+    "topic": "dbms",
+    "questionText": "What is ORM? What benefits it provides in regards to relational databases usage?",
+    "answerText": "Wikipedia: \"is a programming technique for converting data between incompatible type systems using object-oriented programming languages\"\n\nIn regards to the relational databases:\n\n   Database as code\n   Database abstraction\n   Encapsulates SQL complexity\n   Enables code review process\n  * Enables usage as a native OOP structure",
+    "difficulty": "easy",
+    "type": "theory",
+    "source": "extracted",
+    "id": "dbms_extracted_3312"
+  },
+  {
+    "topic": "dbms",
+    "questionText": "What is DDL?",
+    "answerText": "Wikipedia: \"In the context of SQL, data definition or data description language (DDL) is a syntax for creating and modifying database objects such as tables, indices, and users.\"",
+    "difficulty": "easy",
+    "type": "theory",
+    "source": "extracted",
+    "id": "dbms_extracted_3313"
+  },
+  {
+    "topic": "dbms",
+    "questionText": "What is Time Series database?",
+    "answerText": "A database designed specifically for time series based data.\n\nIt comes with multiple optimizations:\n\n: complete this :)",
+    "difficulty": "easy",
+    "type": "theory",
+    "source": "extracted",
+    "id": "dbms_extracted_3314"
+  },
+  {
+    "topic": "dbms",
+    "questionText": "L is needed",
+    "answerText": "ble names, field names, data types and mention the foreign keys used.",
+    "difficulty": "medium",
+    "type": "theory",
+    "source": "extracted",
+    "id": "dbms_extracted_3315"
+  }
+]

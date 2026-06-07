@@ -1,0 +1,20 @@
+[
+  {
+    "topic": "os",
+    "questionText": "uestions given the following program (without running it):",
+    "answerText": "in()\n{\n  fork();\n  printf(\"\\nyay\\n\");\n  return 0;\n}\n```\n\n1. How many times the word \"yay\" will be printed?\n2. How many processes will be created?",
+    "difficulty": "medium",
+    "type": "theory",
+    "source": "extracted",
+    "id": "os_extracted_4061"
+  },
+  {
+    "topic": "os",
+    "questionText": "uestions given the following program (without running it):",
+    "answerText": "in()\n{\n  fork();\n  fork();\n  printf(\"\\nyay\\n\");\n  return 0;\n}\n```\n\n1. How many times the word \"yay\" will be printed?\n2. How many processes will be created?",
+    "difficulty": "medium",
+    "type": "theory",
+    "source": "extracted",
+    "id": "os_extracted_4062"
+  }
+]

@@ -20,6 +20,14 @@ const theoryData = require("../../data/data-theory.json");
 // ── Source 3: data/data-coding.json (37 coding cards in template format) ─────
 const codingData = require("../../data/data-coding.json");
 
+// ── Source 4: Extracted questions from 327 markdown files in data/Docs/ ────
+const extractedDevops = require("../data/questions/extracted/devops.json");
+const extractedDbms = require("../data/questions/extracted/dbms.json");
+const extractedNetworking = require("../data/questions/extracted/networking.json");
+const extractedSystemDesign = require("../data/questions/extracted/system_design.json");
+const extractedOs = require("../data/questions/extracted/os.json");
+const extractedNodejs = require("../data/questions/extracted/nodejs.json");
+
 // ── Section → topic mapping for data-theory.json ────────────────────────────
 const THEORY_TOPIC_MAP = {
   s1:  "java",   // Core Java — OOP Concepts
@@ -130,9 +138,19 @@ async function seed() {
     const theoryQuestions = convertTheoryQuestions();
     const codingQuestions = convertCodingQuestions();
 
-    const allQuestions = [...existingQuestions, ...theoryQuestions, ...codingQuestions];
+    // Source 4: extracted markdown questions
+    const extractedQuestions = [
+      ...extractedDevops,
+      ...extractedDbms,
+      ...extractedNetworking,
+      ...extractedSystemDesign,
+      ...extractedOs,
+      ...extractedNodejs,
+    ];
+
+    const allQuestions = [...existingQuestions, ...theoryQuestions, ...codingQuestions, ...extractedQuestions];
     console.log(`  Total questions to seed: ${allQuestions.length}`);
-    console.log(`  (${existingQuestions.length} from topic files, ${theoryQuestions.length} from data-theory.json, ${codingQuestions.length} from data-coding.json)`);
+    console.log(`  (${existingQuestions.length} from topic files, ${theoryQuestions.length} from data-theory.json, ${codingQuestions.length} from data-coding.json, ${extractedQuestions.length} from markdown extraction)`);
 
     let upserted = 0;
     let skipped = 0;
