@@ -152,40 +152,36 @@ async function seed() {
     console.log(`  Total questions to seed: ${allQuestions.length}`);
     console.log(`  (${existingQuestions.length} from topic files, ${theoryQuestions.length} from data-theory.json, ${codingQuestions.length} from data-coding.json, ${extractedQuestions.length} from markdown extraction)`);
 
-    let upserted = 0;
-    let skipped = 0;
+    // ⚠️ Collect ALL existing IDs in a single query instead of 4,843 individual lookups
+    const allIds = allQuestions.map(q => q.id || `builtin_${Math.random().toString(36).slice(2)}`);
+    const existing = await prisma.question.findMany({
+      where: { id: { in: allIds } },
+      select: { id: true },
+    });
+    const existingIds = new Set(existing.map(q => q.id));
 
-    for (const q of allQuestions) {
-      const id = q.id || `builtin_${seqId++}`;
+    // Filter to only new questions
+    const newQuestions = allQuestions.filter((q, i) => !existingIds.has(allIds[i]));
 
-      // ⚠️ IMPORTANT: We explicitly set `id` in the `create` block so that
-      //    the upsert's `where: { id }` actually matches on subsequent runs.
-      //    Without this, Prisma generates a UUID and the upsert always creates
-      //    a NEW record instead of updating the existing one.
-      const existing = await prisma.question.findUnique({ where: { id } });
-
-      if (existing) {
-        skipped++;
-      } else {
-        await prisma.question.create({
-          data: {
-            id,
-            topic: q.topic,
-            questionText: q.questionText,
-            answerText: q.answerText,
-            difficulty: q.difficulty || "medium",
-            type: q.type || "theory",
-            source: q.source || "builtin",
-            starterCode: q.starterCode || null,
-            testCases: q.testCases || null,
-          },
-        });
-        upserted++;
-      }
+    // Batch insert with createMany (1 query instead of thousands)
+    if (newQuestions.length > 0) {
+      await prisma.question.createMany({
+        data: newQuestions.map(q => ({
+          id: q.id,
+          topic: q.topic,
+          questionText: q.questionText,
+          answerText: q.answerText,
+          difficulty: q.difficulty || "medium",
+          type: q.type || "theory",
+          source: q.source || "builtin",
+          starterCode: q.starterCode || null,
+          testCases: q.testCases || null,
+        })),
+      });
     }
 
-    console.log(`✅ Done: ${upserted} created, ${skipped} already exist (skipped)`);
-    console.log(`   Total in database: ${upserted + skipped}`);
+    console.log(`✅ Done: ${newQuestions.length} created, ${existingIds.size} already exist (skipped)`);
+    console.log(`   Total in database: ${newQuestions.length + existingIds.size}`);
   } catch (error) {
     console.error("❌ Seeding failed:", error);
     process.exit(1);

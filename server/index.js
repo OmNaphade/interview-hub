@@ -8,7 +8,7 @@ const { ensureImages, checkDocker } = require("./services/dockerService");
 const PORT = config.port;
 const app = createApp();
 
-const server = app.listen(PORT, async () => {
+const server = app.listen(PORT, '0.0.0.0', async () => {
   console.log(`Server running on http://localhost:${PORT}`);
   console.log(`GROQ: ${config.groq.chatModel}`);
 
