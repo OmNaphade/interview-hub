@@ -1,0 +1,21 @@
+{
+  "id": "s_java_coding",
+  "label": "Java — Coding",
+  "cards": [
+    {
+      "num": "1",
+      "numColor": "red",
+      "title": "Implement a thread-safe singleton pattern.",
+      "desc": "Use eager initialization, static block, or double-checked locking.",
+      "tags": [
+        "Hard"
+      ],
+      "complexity": [],
+      "approach": "Use eager initialization, static block, or double-checked locking. Best approach: use enum (most thread-safe) or static inner class. Avoid synchronized methods for performance.",
+      "sqlNote": "",
+      "language": "",
+      "code": "public class Singleton {\n  // Your code here\n}",
+      "difficulty": "Hard"
+    }
+  ]
+}

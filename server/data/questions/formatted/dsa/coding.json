@@ -1,0 +1,36 @@
+{
+  "id": "s_dsa_coding",
+  "label": "Data Structures & Algorithms — Coding",
+  "cards": [
+    {
+      "num": "1",
+      "numColor": "yellow",
+      "title": "Implement a function to reverse a linked list.",
+      "desc": "Use three pointers: prev, curr, next.",
+      "tags": [
+        "Medium"
+      ],
+      "complexity": [],
+      "approach": "Use three pointers: prev, curr, next. Iterate through the list, reversing the direction of pointers at each node. Time: O(n), Space: O(1).",
+      "sqlNote": "",
+      "language": "",
+      "code": "function reverseLinkedList(head) {\n  // Your code here\n  return head;\n}",
+      "difficulty": "Medium"
+    },
+    {
+      "num": "2",
+      "numColor": "red",
+      "title": "Implement a solution to find the longest common subsequence (LCS) of two strings.",
+      "desc": "Use dynamic programming with a 2D table where dp[i][j] represents the LCS length for first i and j characters.",
+      "tags": [
+        "Hard"
+      ],
+      "complexity": [],
+      "approach": "Use dynamic programming with a 2D table where dp[i][j] represents the LCS length for first i and j characters. If characters match, dp[i][j] = dp[i-1][j-1] + 1, otherwise take the maximum of dp[i-1][j] and dp[i][j-1]. Time: O(m*n), Space: O(m*n).",
+      "sqlNote": "",
+      "language": "",
+      "code": "function longestCommonSubsequence(text1, text2) {\n  // Your code here\n  return 0;\n}",
+      "difficulty": "Hard"
+    }
+  ]
+}

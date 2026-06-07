@@ -1,0 +1,95 @@
+{
+  "id": "s_os_theory",
+  "icon": "",
+  "color": "c1",
+  "dcolor": "d1",
+  "title": "Operating Systems — Theory",
+  "toc": "Operating Systems Theory",
+  "questions": [
+    {
+      "id": "os_1",
+      "question": "What is the difference between a process and a thread?",
+      "explanation": "Process: independent program instance with own memory space. Thread: lightweight unit within a process sharing memory. Context switching: processes expensive, threads cheap. Processes more isolated, threads easier communication but need synchronization.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Medium",
+      "tags": [
+        "Medium",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "os_2",
+      "question": "Explain virtual memory.",
+      "explanation": "Virtual memory abstracts physical RAM using disk storage. Enables programs larger than RAM to run. Paging divides memory into pages, swapping moves to disk when needed. Causes slower access but enables memory isolation and flexibility.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Hard",
+      "tags": [
+        "Hard",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "os_3",
+      "question": "What is a deadlock and how can it be prevented?",
+      "explanation": "Deadlock: threads permanently blocked waiting for each other. Requirements: mutual exclusion, hold-and-wait, no preemption, circular wait. Prevention: break any requirement (e.g., ordered resource allocation, timeout, preemption).",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Hard",
+      "tags": [
+        "Hard",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "os_4",
+      "question": "Explain page replacement algorithms.",
+      "explanation": "When physical memory full, choose page to evict. Algorithms: FIFO (simple but poor), LRU (recent pages likely needed again), LFU (frequency-based), Optimal (future knowledge needed). Trade accuracy vs overhead.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Hard",
+      "tags": [
+        "Hard",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "os_5",
+      "question": "What is the difference between race condition and mutual exclusion?",
+      "explanation": "Race condition: behavior depends on timing, leads to unpredictable results. Mutual exclusion: mechanism ensuring only one thread accesses resource at a time. Used to prevent race conditions. Implemented with locks, semaphores, monitors.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Medium",
+      "tags": [
+        "Medium",
+        "Frequent"
+      ]
+    }
+  ]
+}

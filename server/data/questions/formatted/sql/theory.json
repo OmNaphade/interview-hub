@@ -1,0 +1,78 @@
+{
+  "id": "s_sql_theory",
+  "icon": "",
+  "color": "c1",
+  "dcolor": "d1",
+  "title": "SQL — Theory",
+  "toc": "SQL Theory",
+  "questions": [
+    {
+      "id": "sql_1",
+      "question": "Explain the difference between INNER JOIN and LEFT JOIN.",
+      "explanation": "INNER JOIN: returns only matching rows from both tables. LEFT JOIN: returns all rows from left table and matching rows from right table (NULL for non-matches). Choose based on whether you want to exclude non-matching rows.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Easy",
+      "tags": [
+        "Easy",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "sql_3",
+      "question": "What is a window function?",
+      "explanation": "Window functions compute values across rows while maintaining individual rows. Syntax: function() OVER (PARTITION BY ... ORDER BY ...). Examples: ROW_NUMBER, RANK, LAG, LEAD. Useful for analytics without aggregation.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Hard",
+      "tags": [
+        "Hard",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "sql_4",
+      "question": "Explain GROUP BY and HAVING.",
+      "explanation": "GROUP BY: groups rows by specified columns. HAVING: filters groups (like WHERE but for grouped data). WHERE filters rows before grouping, HAVING after. Often combined with aggregate functions.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Medium",
+      "tags": [
+        "Medium",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "sql_5",
+      "question": "What is the difference between UNION and UNION ALL?",
+      "explanation": "UNION: combines results from multiple queries and removes duplicates (slower). UNION ALL: keeps duplicates (faster). Both require same column count and compatible types. UNION ALL preferred if duplicates acceptable.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Easy",
+      "tags": [
+        "Easy",
+        "Frequent"
+      ]
+    }
+  ]
+}

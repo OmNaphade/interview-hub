@@ -1,0 +1,78 @@
+{
+  "id": "s_java_theory",
+  "icon": "",
+  "color": "c1",
+  "dcolor": "d1",
+  "title": "Java — Theory",
+  "toc": "Java Theory",
+  "questions": [
+    {
+      "id": "java_1",
+      "question": "What is the difference between abstract class and interface?",
+      "explanation": "Abstract class: can have both abstract and concrete methods, state, constructors. Interface: only abstract methods (until Java 8), no state, no constructors. A class can implement multiple interfaces but extend only one abstract class. Use interfaces for contracts, abstract classes for shared implementation.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Medium",
+      "tags": [
+        "Medium",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "java_2",
+      "question": "Explain garbage collection in Java.",
+      "explanation": "Java automatically manages memory through garbage collection. When objects are no longer reachable, the GC reclaims their memory. Algorithms include mark-and-sweep, copying, generational collection. Developers shouldn't rely on explicit garbage collection (System.gc() is just a suggestion).",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Medium",
+      "tags": [
+        "Medium",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "java_3",
+      "question": "What are Java generics and why are they useful?",
+      "explanation": "Generics provide compile-time type safety for collections and other data structures. Enable writing generic algorithms that work with different types. Reduce need for casting. Syntax: List<String> list = new ArrayList<>(). Type erasure removes generic information at runtime.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Medium",
+      "tags": [
+        "Medium",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "java_5",
+      "question": "What is the purpose of the volatile keyword?",
+      "explanation": "volatile ensures that reads and writes to a variable are atomic and visible across threads. Prevents compiler optimizations that might cache the value. Doesn't provide mutual exclusion like synchronized. Used for flags and status variables.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Hard",
+      "tags": [
+        "Hard",
+        "Frequent"
+      ]
+    }
+  ]
+}

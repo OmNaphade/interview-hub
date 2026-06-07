@@ -1,0 +1,95 @@
+{
+  "id": "s_networking_theory",
+  "icon": "",
+  "color": "c1",
+  "dcolor": "d1",
+  "title": "Computer Networking — Theory",
+  "toc": "Computer Networking Theory",
+  "questions": [
+    {
+      "id": "net_1",
+      "question": "Explain the OSI model layers.",
+      "explanation": "7 layers: Physical (cables), Data Link (MAC), Network (IP), Transport (TCP/UDP), Session (connections), Presentation (encryption), Application (HTTP). Each layer adds its own header (encapsulation). Used for troubleshooting and protocol design.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Medium",
+      "tags": [
+        "Medium",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "net_2",
+      "question": "What is the difference between TCP and UDP?",
+      "explanation": "TCP: reliable, ordered, connection-oriented, slower, error-checking. UDP: unreliable, connectionless, faster, no ordering guarantee. Use TCP for important data (HTTP, email), UDP for speed (video, DNS).",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Easy",
+      "tags": [
+        "Easy",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "net_3",
+      "question": "Explain SSL/TLS handshake.",
+      "explanation": "Client sends hello with supported ciphers. Server responds with certificate and chosen cipher. Exchange key material using asymmetric encryption. Switch to symmetric encryption for session. Provides confidentiality and authenticity.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Hard",
+      "tags": [
+        "Hard",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "net_4",
+      "question": "What is DNS and how does it work?",
+      "explanation": "DNS translates domain names to IP addresses. Client queries resolver, which queries root nameserver, TLD nameserver, then authoritative nameserver. Results cached at multiple levels. Uses UDP for queries, TCP for zone transfers.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Medium",
+      "tags": [
+        "Medium",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "net_5",
+      "question": "Explain HTTP request/response cycle.",
+      "explanation": "Client sends request (method, path, headers, body). Server processes and sends response (status, headers, body). Methods: GET (retrieve), POST (create), PUT (update), DELETE (remove). Status codes: 2xx success, 3xx redirect, 4xx client error, 5xx server error.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Easy",
+      "tags": [
+        "Easy",
+        "Frequent"
+      ]
+    }
+  ]
+}

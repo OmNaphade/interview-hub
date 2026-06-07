@@ -1,0 +1,95 @@
+{
+  "id": "s_devops_theory",
+  "icon": "",
+  "color": "c1",
+  "dcolor": "d1",
+  "title": "DevOps — Theory",
+  "toc": "DevOps Theory",
+  "questions": [
+    {
+      "id": "devops_1",
+      "question": "Explain continuous integration and continuous deployment.",
+      "explanation": "CI: automatically test code on every commit. CD: automatically deploy tested code to production. Benefits: faster feedback, reduced manual errors, frequent releases. Tools: GitHub Actions, Jenkins, CircleCI.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Medium",
+      "tags": [
+        "Medium",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "devops_2",
+      "question": "What are Docker containers and why are they useful?",
+      "explanation": "Containers package application with dependencies in isolated environment. Lightweight compared to VMs. Enable consistent deployment across environments. Facilitate microservices architecture. Use Docker for containerization.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Easy",
+      "tags": [
+        "Easy",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "devops_3",
+      "question": "Explain Kubernetes and its main components.",
+      "explanation": "Kubernetes: container orchestration platform. Components: Pod (smallest unit), Node (worker machine), Cluster (collection of nodes), Service (network abstraction). Handles deployment, scaling, networking. Steep learning curve but powerful.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Hard",
+      "tags": [
+        "Hard",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "devops_4",
+      "question": "What is Infrastructure as Code (IaC)?",
+      "explanation": "Define infrastructure through code/configuration files (Terraform, CloudFormation). Benefits: version control, reproducibility, automation, documentation. Version infrastructure like application code.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Medium",
+      "tags": [
+        "Medium",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "devops_5",
+      "question": "Explain monitoring and logging in DevOps.",
+      "explanation": "Monitoring: track system metrics (CPU, memory, response time). Logging: record application/system events. Together enable quick issue identification and debugging. Tools: Prometheus, ELK stack, DataDog.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Medium",
+      "tags": [
+        "Medium",
+        "Frequent"
+      ]
+    }
+  ]
+}

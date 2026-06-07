@@ -1,0 +1,95 @@
+{
+  "id": "s_react_theory",
+  "icon": "",
+  "color": "c1",
+  "dcolor": "d1",
+  "title": "React — Theory",
+  "toc": "React Theory",
+  "questions": [
+    {
+      "id": "react_1",
+      "question": "What is the difference between controlled and uncontrolled components?",
+      "explanation": "Controlled: React state manages input value, provides onChange handler. Uncontrolled: DOM manages value via ref. Controlled preferred for form validation and complex forms. Uncontrolled simpler but less control.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Medium",
+      "tags": [
+        "Medium",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "react_2",
+      "question": "Explain React hooks and provide examples.",
+      "explanation": "Hooks allow functional components to use state and effects. useState: manage state. useEffect: handle side effects. useContext: access context. useReducer: complex state logic. Rules: only call in function body, not conditionally.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Medium",
+      "tags": [
+        "Medium",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "react_3",
+      "question": "What is the virtual DOM and why is it important?",
+      "explanation": "Virtual DOM: in-memory representation of real DOM. React compares old and new virtual DOM (diffing) and batches updates. Only changed elements update in real DOM. Improves performance and abstracts browser differences.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Easy",
+      "tags": [
+        "Easy",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "react_4",
+      "question": "How do you optimize React component performance?",
+      "explanation": "Techniques: React.memo for memoization, useMemo for expensive calculations, useCallback for stable functions, lazy loading with React.lazy, code splitting, removing unused dependencies. Profiler tool identifies bottlenecks.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Hard",
+      "tags": [
+        "Hard",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "react_5",
+      "question": "What are keys in React lists and why are they important?",
+      "explanation": "Keys help React identify which items changed/added/removed. Use unique, stable identifiers (IDs, not indexes). Without proper keys, component state gets mixed up during list reordering. Critical for performance and correctness.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Medium",
+      "tags": [
+        "Medium",
+        "Frequent"
+      ]
+    }
+  ]
+}

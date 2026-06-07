@@ -1,0 +1,21 @@
+{
+  "id": "s_nodejs_coding",
+  "label": "Node.js — Coding",
+  "cards": [
+    {
+      "num": "1",
+      "numColor": "yellow",
+      "title": "Implement an async/await based route handler.",
+      "desc": "Wrap route in async function, use await for promises.",
+      "tags": [
+        "Medium"
+      ],
+      "complexity": [],
+      "approach": "Wrap route in async function, use await for promises. Wrap in try/catch for error handling. Pass errors to next() for Express error handling.",
+      "sqlNote": "",
+      "language": "",
+      "code": "router.get('/data', async (req, res, next) => {\n  // Your code here\n});",
+      "difficulty": "Medium"
+    }
+  ]
+}

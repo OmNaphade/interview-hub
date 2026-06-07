@@ -1,0 +1,36 @@
+{
+  "id": "s_python_coding",
+  "label": "Python — Coding",
+  "cards": [
+    {
+      "num": "1",
+      "numColor": "yellow",
+      "title": "Implement a decorator that measures function execution time.",
+      "desc": "Use functools.",
+      "tags": [
+        "Medium"
+      ],
+      "complexity": [],
+      "approach": "Use functools.wraps to preserve metadata and time.time() to measure execution. Decorators are functions that modify other functions without changing their source code.",
+      "sqlNote": "",
+      "language": "",
+      "code": "import functools\nimport time\n\ndef timer_decorator(func):\n    # Your code here\n    return func",
+      "difficulty": "Medium"
+    },
+    {
+      "num": "2",
+      "numColor": "teal",
+      "title": "Implement a function to find duplicate elements in a list.",
+      "desc": "Use a set to track seen elements.",
+      "tags": [
+        "Easy"
+      ],
+      "complexity": [],
+      "approach": "Use a set to track seen elements. Iterate through list and add to set if not seen, otherwise it's a duplicate. Time: O(n), Space: O(n). Alternative: sort first, compare adjacent elements.",
+      "sqlNote": "",
+      "language": "",
+      "code": "def find_duplicates(nums):\n    # Your code here\n    return []",
+      "difficulty": "Easy"
+    }
+  ]
+}

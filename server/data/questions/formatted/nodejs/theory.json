@@ -1,0 +1,78 @@
+{
+  "id": "s_nodejs_theory",
+  "icon": "",
+  "color": "c1",
+  "dcolor": "d1",
+  "title": "Node.js — Theory",
+  "toc": "Node.js Theory",
+  "questions": [
+    {
+      "id": "node_1",
+      "question": "Explain the Node.js event loop.",
+      "explanation": "Single-threaded but non-blocking. Event loop handles callbacks. Phases: timers, pending callbacks, idle/prepare, poll (I/O), check, close. Microtasks (promises) run between phases. libuv library manages the loop.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Hard",
+      "tags": [
+        "Hard",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "node_2",
+      "question": "What are streams in Node.js?",
+      "explanation": "Streams process data in chunks rather than loading entirely. Types: readable, writable, duplex, transform. Benefits: memory efficient, composable. Examples: file reading, HTTP requests/responses, compression.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Medium",
+      "tags": [
+        "Medium",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "node_3",
+      "question": "What is middleware in Express?",
+      "explanation": "Middleware functions process requests/responses. Called in order. Can modify req/res, end request, or pass to next middleware. Signature: (req, res, next) => {}. Used for authentication, logging, error handling.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Easy",
+      "tags": [
+        "Easy",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "node_5",
+      "question": "What is the difference between process.nextTick and setImmediate?",
+      "explanation": "nextTick: microtask, executed after current operation completes. setImmediate: macrotask, executed in next event loop iteration. nextTick higher priority. Generally use setImmediate for heavy work.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Hard",
+      "tags": [
+        "Hard",
+        "Frequent"
+      ]
+    }
+  ]
+}

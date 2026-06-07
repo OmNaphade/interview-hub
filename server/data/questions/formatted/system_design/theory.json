@@ -1,0 +1,95 @@
+{
+  "id": "s_system_design_theory",
+  "icon": "",
+  "color": "c1",
+  "dcolor": "d1",
+  "title": "System Design — Theory",
+  "toc": "System Design Theory",
+  "questions": [
+    {
+      "id": "sd_1",
+      "question": "How would you design a URL shortening service like bit.ly?",
+      "explanation": "Use a hashing algorithm to generate short codes. Store mappings in database with indexes on both short and long URLs. Use caching layer (Redis) for frequent lookups. Consider rate limiting, analytics, and expiration policies.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Hard",
+      "tags": [
+        "Hard",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "sd_2",
+      "question": "Design a distributed cache system.",
+      "explanation": "Key considerations: consistent hashing for distribution, TTL for expiration, replication for fault tolerance, eviction policies (LRU, LFU). Use technologies like Redis or Memcached. Handle cache invalidation (hard problem) with strategies like TTL or write-through.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Hard",
+      "tags": [
+        "Hard",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "sd_3",
+      "question": "Explain horizontal vs vertical scaling.",
+      "explanation": "Vertical scaling: add more resources to a single machine (CPU, RAM). Horizontal scaling: add more machines to the system. Horizontal is more scalable and fault-tolerant but introduces complexity (coordination, state management). Most modern systems prefer horizontal scaling with load balancers.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Easy",
+      "tags": [
+        "Easy",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "sd_4",
+      "question": "How would you design a rate limiter?",
+      "explanation": "Use token bucket algorithm: tokens added at fixed rate, each request costs 1 token. Reject if no tokens available. Alternatives: sliding window, leaky bucket. Can be implemented with in-memory cache or distributed cache for multiple servers.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Hard",
+      "tags": [
+        "Hard",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "sd_5",
+      "question": "Design a notification system.",
+      "explanation": "Components: API to send notifications, queue (message broker) for async processing, workers to process notifications, storage for delivery status. Support multiple channels: email, SMS, push. Ensure reliability with retries and idempotency keys.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Hard",
+      "tags": [
+        "Hard",
+        "Frequent"
+      ]
+    }
+  ]
+}

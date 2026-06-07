@@ -1,0 +1,61 @@
+{
+  "id": "s_python_theory",
+  "icon": "",
+  "color": "c1",
+  "dcolor": "d1",
+  "title": "Python — Theory",
+  "toc": "Python Theory",
+  "questions": [
+    {
+      "id": "py_1",
+      "question": "What is the difference between list and tuple in Python?",
+      "explanation": "Lists are mutable (can be modified), tuples are immutable (cannot be modified). Lists use square brackets [], tuples use parentheses (). Tuples are generally faster and can be used as dictionary keys. Both support indexing and slicing.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Easy",
+      "tags": [
+        "Easy",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "py_3",
+      "question": "Explain list comprehension and provide an example.",
+      "explanation": "List comprehension provides a concise way to create lists. Syntax: [expression for item in iterable if condition]. Example: [x*2 for x in range(10) if x % 2 == 0] creates [0, 4, 8, 12, 16]. It's more readable and often faster than using loops with append().",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Easy",
+      "tags": [
+        "Easy",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "py_4",
+      "question": "What is a generator in Python and how does it differ from a regular function?",
+      "explanation": "Generators use 'yield' instead of 'return' and return an iterator object. They generate values on-the-fly without storing entire sequences in memory. Useful for large datasets and infinite sequences. Can be created with generator expressions: (x for x in range(1000000)).",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Medium",
+      "tags": [
+        "Medium",
+        "Frequent"
+      ]
+    }
+  ]
+}

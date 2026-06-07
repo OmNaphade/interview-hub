@@ -1,0 +1,21 @@
+{
+  "id": "s_javascript_coding",
+  "label": "JavaScript — Coding",
+  "cards": [
+    {
+      "num": "1",
+      "numColor": "yellow",
+      "title": "Implement a function that flattens a nested array.",
+      "desc": "Use recursion to check if each element is an array and recursively flatten it.",
+      "tags": [
+        "Medium"
+      ],
+      "complexity": [],
+      "approach": "Use recursion to check if each element is an array and recursively flatten it. Or use Array.flat() method. Time: O(n) where n is total elements, Space: O(depth).",
+      "sqlNote": "",
+      "language": "",
+      "code": "function flattenArray(arr) {\n  // Your code here\n  return [];\n}",
+      "difficulty": "Medium"
+    }
+  ]
+}

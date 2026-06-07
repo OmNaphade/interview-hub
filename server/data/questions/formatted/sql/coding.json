@@ -1,0 +1,21 @@
+{
+  "id": "s_sql_coding",
+  "label": "SQL — Coding",
+  "cards": [
+    {
+      "num": "1",
+      "numColor": "yellow",
+      "title": "Write a query to find the second highest salary.",
+      "desc": "Use LIMIT with OFFSET or window functions: SELECT salary FROM employees ORDER BY salary DESC LIMIT 1 OFFSET 1.",
+      "tags": [
+        "Medium"
+      ],
+      "complexity": [],
+      "approach": "Use LIMIT with OFFSET or window functions: SELECT salary FROM employees ORDER BY salary DESC LIMIT 1 OFFSET 1. Or use MAX(salary) with subquery.",
+      "sqlNote": "",
+      "language": "",
+      "code": "-- Your SQL query here",
+      "difficulty": "Medium"
+    }
+  ]
+}

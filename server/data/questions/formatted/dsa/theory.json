@@ -1,0 +1,61 @@
+{
+  "id": "s_dsa_theory",
+  "icon": "",
+  "color": "c1",
+  "dcolor": "d1",
+  "title": "Data Structures & Algorithms — Theory",
+  "toc": "Data Structures & Algorithms Theory",
+  "questions": [
+    {
+      "id": "dsa_1",
+      "question": "Explain the difference between an array and a linked list.",
+      "explanation": "Arrays store elements contiguously in memory and provide O(1) random access. Linked lists use nodes with pointers and require O(n) time for access but allow O(1) insertion/deletion at known positions. Arrays are better for frequent access, linked lists for frequent insertions/deletions.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Easy",
+      "tags": [
+        "Easy",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "dsa_3",
+      "question": "What is the time complexity of binary search?",
+      "explanation": "Binary search has O(log n) time complexity because it divides the search space in half at each step. Space complexity is O(1) for iterative and O(log n) for recursive implementations.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Easy",
+      "tags": [
+        "Easy",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "dsa_5",
+      "question": "Explain hash tables and how collision handling works.",
+      "explanation": "Hash tables use a hash function to map keys to array indices. Collisions occur when multiple keys hash to the same index. Common collision handling methods: 1) Chaining: store multiple values in linked lists, 2) Open addressing: find another empty slot (linear/quadratic probing). Chaining is generally preferred.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Medium",
+      "tags": [
+        "Medium",
+        "Frequent"
+      ]
+    }
+  ]
+}

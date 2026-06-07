@@ -1,0 +1,78 @@
+{
+  "id": "s_javascript_theory",
+  "icon": "",
+  "color": "c1",
+  "dcolor": "d1",
+  "title": "JavaScript — Theory",
+  "toc": "JavaScript Theory",
+  "questions": [
+    {
+      "id": "js_1",
+      "question": "Explain the difference between var, let, and const.",
+      "explanation": "var: function-scoped, hoisted, can be redeclared. let: block-scoped, hoisted (TDZ), cannot be redeclared. const: block-scoped, hoisted (TDZ), must be initialized, cannot be reassigned (but properties can be modified if object). Use const by default, let if you need reassignment.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Easy",
+      "tags": [
+        "Easy",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "js_2",
+      "question": "What is closure and provide an example.",
+      "explanation": "A closure is a function that has access to variables from its outer (enclosing) function's scope even after the outer function returns. Closures are created every time a function is created.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Medium",
+      "tags": [
+        "Medium",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "js_4",
+      "question": "Explain async/await and how it differs from promises.",
+      "explanation": "async/await is syntactic sugar over promises that makes asynchronous code look synchronous. async functions always return a promise. await pauses execution until the promise settles. Easier to read and debug than .then() chains. Error handling via try/catch blocks.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Medium",
+      "tags": [
+        "Medium",
+        "Frequent"
+      ]
+    },
+    {
+      "id": "js_5",
+      "question": "What is the event loop in JavaScript?",
+      "explanation": "The event loop continuously checks the call stack and callback queue. When the stack is empty, it moves callbacks from the queue to the stack. Microtasks (promises, async) have higher priority than macrotasks (setTimeout, setInterval). This explains why async code executes before timeouts.",
+      "code": "",
+      "language": "",
+      "tableHeaders": [],
+      "tableRows": [],
+      "note": "",
+      "tip": "",
+      "warn": "",
+      "difficulty": "Hard",
+      "tags": [
+        "Hard",
+        "Frequent"
+      ]
+    }
+  ]
+}
