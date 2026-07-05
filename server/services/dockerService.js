@@ -1,12 +1,16 @@
-const { execSync, exec } = require("child_process");
-const fs = require("fs");
-const path = require("path");
-const crypto = require("crypto");
+const { execSync, execFile } = require("node:child_process");
+const fs = require("node:fs");
+const path = require("node:path");
+const crypto = require("node:crypto");
+const { promisify } = require("node:util");
 const { AppError } = require("../middleware/errorHandler");
+const { recordContainerRun, recordDockerCheck } = require("./monitoringService");
 
 const WORK_DIR = path.join(__dirname, "..", "datafiles", "playground");
 
-let dockerAvailable = true; // optimistic — assume available until checked
+const execFileAsync = promisify(execFile);
+
+let dockerAvailable = false;
 
 async function checkDocker() {
   try {
@@ -17,6 +21,7 @@ async function checkDocker() {
     dockerAvailable = false;
     console.log("⚠️  Docker not available — playground execution disabled");
   }
+  recordDockerCheck({ available: dockerAvailable });
   return dockerAvailable;
 }
 
@@ -63,17 +68,15 @@ const LANGUAGE_CONFIG = {
   mysql: {
     id: "mysql", label: "MySQL", image: "mysql:8.0", ext: "sql",
     isDatabase: true,
-    dbEnv: { MYSQL_ROOT_PASSWORD: "playground", MYSQL_DATABASE: "playground" },
+    dbName: "playground",
     dbPort: 3306,
-    cliCommand: (c) => `docker exec ${c} mysql -uroot -pplayground playground -t -e`,
     memory: "256m", timeout: 120000,
   },
   postgresql: {
     id: "postgresql", label: "PostgreSQL", image: "postgres:16", ext: "sql",
     isDatabase: true,
-    dbEnv: { POSTGRES_PASSWORD: "playground", POSTGRES_DB: "playground" },
+    dbName: "playground",
     dbPort: 5432,
-    cliCommand: (c) => `docker exec ${c} psql -U postgres -d playground -c`,
     memory: "256m", timeout: 120000,
   },
 };
@@ -85,21 +88,51 @@ function ensureWorkDir() {
 }
 
 async function runCode(language, code) {
+  const startedAt = Date.now();
+  let success = false;
+  let isDatabase = false;
+
   if (!language || !code) {
+    recordContainerRun({
+      language: language || "unknown",
+      durationMs: Date.now() - startedAt,
+      success: false,
+      isDatabase: false,
+    });
     throw new AppError(400, "Language and code are required");
   }
 
   if (!dockerAvailable) {
+    recordContainerRun({
+      language,
+      durationMs: Date.now() - startedAt,
+      success: false,
+      isDatabase: false,
+    });
     throw new AppError(503, "Code execution is only available in development. Docker is required but not running on this server.");
   }
 
   const config = LANGUAGE_CONFIG[language];
   if (!config) {
+    recordContainerRun({
+      language,
+      durationMs: Date.now() - startedAt,
+      success: false,
+      isDatabase: false,
+    });
     throw new AppError(400, `Unsupported language: ${language}`);
   }
 
+  isDatabase = Boolean(config.isDatabase);
+
   // Validate code size
   if (code.length > 100000) {
+    recordContainerRun({
+      language,
+      durationMs: Date.now() - startedAt,
+      success: false,
+      isDatabase,
+    });
     throw new AppError(400, "Code exceeds maximum length of 100KB");
   }
 
@@ -113,55 +146,91 @@ async function runCode(language, code) {
     fs.writeFileSync(path.join(sessionDir, filename), code);
 
     if (config.isDatabase) {
-      return await runDatabaseQuery(config, sessionId, sessionDir, filename);
+      const result = await runDatabaseQuery(config, sessionId, sessionDir, filename);
+      success = !result.error;
+      return result;
     }
-    return await runCodeContainer(config, sessionDir, filename);
+    const result = await runCodeContainer(config, sessionDir, filename);
+    success = !result.error;
+    return result;
   } catch (error) {
-    return handleDockerError(sessionDir, error);
+    const result = handleDockerError(sessionDir, error);
+    success = !result.error;
+    return result;
   } finally {
+    recordContainerRun({
+      language,
+      durationMs: Date.now() - startedAt,
+      success,
+      isDatabase,
+    });
     cleanupDir(sessionDir);
   }
 }
 
 async function runCodeContainer(config, sessionDir, filename) {
-  const cmd = [
-    "docker run --rm",
-    "--network none",
-    `-m ${config.memory}`,
-    "--cpus 1",
-    "--ulimit nproc=64",
-    "--ulimit nofile=64",
-    `-v "${sessionDir}":/code:ro`,
-    config.image,
-    config.prepareCommand
-      ? config.prepareCommand(filename)
-      : config.runCommand(filename),
-  ].join(" ");
+  const runProgram = config.prepareCommand
+    ? config.prepareCommand(filename)
+    : config.runCommand(filename);
 
-  const output = execSync(cmd, {
+  const args = [
+    "run",
+    "--rm",
+    "--network",
+    "none",
+    "-m",
+    config.memory,
+    "--cpus",
+    "1",
+    "--ulimit",
+    "nproc=64",
+    "--ulimit",
+    "nofile=64",
+    "-v",
+    `${sessionDir}:/code:ro`,
+    config.image,
+    "sh",
+    "-c",
+    runProgram,
+  ];
+
+  const { stdout } = await execFileAsync("docker", args, {
     timeout: config.timeout,
     encoding: "utf-8",
     maxBuffer: 1024 * 1024,
   });
 
-  return { output: output.trim(), error: false };
+  return { output: stdout.trim(), error: false };
 }
 
 async function runDatabaseQuery(config, sessionId, sessionDir, filename) {
   const containerName = `playground-${config.id}-${sessionId}`;
+  const dbPassword = crypto.randomBytes(16).toString("base64url");
+  const dbEnv = config.id === "mysql"
+    ? {
+        MYSQL_ROOT_PASSWORD: dbPassword,
+        MYSQL_DATABASE: config.dbName || "playground",
+      }
+    : {
+        POSTGRES_PASSWORD: dbPassword,
+        POSTGRES_DB: config.dbName || "playground",
+      };
 
   let containerCreated = false;
 
   try {
     // Start database container
-    const envVars = Object.entries(config.dbEnv)
-      .map(([k, v]) => `-e ${k}=${v}`)
-      .join(" ");
+    const runArgs = ["run", "-d", "--name", containerName];
+    for (const [key, value] of Object.entries(dbEnv)) {
+      runArgs.push("-e", `${key}=${value}`);
+    }
+    runArgs.push("-m", config.memory, "-v", `${sessionDir}:/code:ro`, config.image);
 
-    execSync(
-      `docker run -d --name ${containerName} ${envVars} -m ${config.memory} ${config.image}`,
-      { timeout: 60000, encoding: "utf-8", shell: true }
-    );
+    await execFileAsync("docker", runArgs, {
+      timeout: 60000,
+      encoding: "utf-8",
+      maxBuffer: 1024 * 1024,
+    });
     containerCreated = true;
 
     // Wait for database to be ready with polling
@@ -171,11 +240,16 @@ async function runDatabaseQuery(config, sessionId, sessionDir, filename) {
 
     while (Date.now() - startTime < maxWait) {
       try {
-        const checkCmd = config.id === "mysql"
-          ? `docker exec ${containerName} mysqladmin ping -uroot -pplayground --silent`
-          : `docker exec ${containerName} pg_isready -U postgres`;
+        const checkArgs = config.id === "mysql"
+          ? ["exec", containerName, "mysqladmin", "ping", "-uroot", `-p${dbPassword}`, "--silent"]
+          : ["exec", containerName, "pg_isready", "-U", "postgres"];
 
-        const result = execSync(checkCmd, { timeout: 5000, encoding: "utf-8" });
+        const { stdout } = await execFileAsync("docker", checkArgs, {
+          timeout: 5000,
+          encoding: "utf-8",
+          maxBuffer: 1024 * 1024,
+        });
+        const result = stdout || "";
         if (result.includes("mysqld is alive") || result.includes("accepting connections")) {
           break;
         }
@@ -190,29 +264,32 @@ async function runDatabaseQuery(config, sessionId, sessionDir, filename) {
     }
 
     // Read and execute SQL
-    const sql = fs.readFileSync(path.join(sessionDir, filename), "utf-8");
+    const sqlPath = path.join(sessionDir, filename);
+    const sql = fs.readFileSync(sqlPath, "utf-8");
     if (!sql.trim()) {
       throw new Error("SQL query is empty");
     }
 
-    const escapedSql = sql.replace(/"/g, '\\"').replace(/\n/g, " ");
-    const isWin = process.platform === "win32";
-    const suppressErr = isWin ? "2>nul" : "2>/dev/null";
-    const execCmd = isWin
-      ? `docker exec ${containerName} ${config.id === "mysql" ? "mysql -uroot -pplayground playground -t -e" : "psql -U postgres -d playground -c"} "${escapedSql}" ${suppressErr}`
-      : `${config.cliCommand(containerName)} "${escapedSql}" ${suppressErr}`;
+    const queryCommand = config.id === "mysql"
+      ? `mysql -uroot -p${dbPassword} ${config.dbName || "playground"} -t < /code/${filename}`
+      : `PGPASSWORD=${dbPassword} psql -U postgres -d ${config.dbName || "playground"} -f /code/${filename}`;
 
-    const output = execSync(execCmd, { timeout: 30000, encoding: "utf-8", maxBuffer: 1024 * 1024 });
+    const { stdout } = await execFileAsync(
+      "docker",
+      ["exec", containerName, "sh", "-c", queryCommand],
+      { timeout: 30000, encoding: "utf-8", maxBuffer: 1024 * 1024 }
+    );
 
-    return { output: output.trim(), error: false };
+    return { output: stdout.trim(), error: false };
   } finally {
     // Always cleanup container if it was created
     if (containerCreated) {
       try {
-        const killCmd = process.platform === "win32"
-      ? `docker kill ${containerName} & docker rm ${containerName}`
-      : `docker kill ${containerName} 2>/dev/null && docker rm ${containerName} 2>/dev/null`;
-    execSync(killCmd, { timeout: 10000, shell: true });
+        await execFileAsync("docker", ["kill", containerName], { timeout: 10000, encoding: "utf-8" });
+      } catch { /* ignore cleanup errors */ }
+
+      try {
+        await execFileAsync("docker", ["rm", containerName], { timeout: 10000, encoding: "utf-8" });
       } catch { /* ignore cleanup errors */ }
     }
   }

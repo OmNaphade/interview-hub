@@ -59,6 +59,11 @@ async function signup(req, res) {
     return res.status(400).json({ error: "Password must be at least 8 characters" });
   }
 
+  // Admin-capable accounts should be controlled out-of-band (env + verified identity provider).
+  if (adminFlag({ email }) && !config.auth.allowPasswordAdminSignup) {
+    return res.status(403).json({ error: "Password signup is disabled for admin accounts" });
+  }
+
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
     return res.status(409).json({ error: "Email already registered" });
@@ -87,6 +92,15 @@ async function login(req, res) {
   const { password } = req.body;
 
   const user = await prisma.user.findUnique({ where: { email } });
+
+  if (adminFlag({ email }) && !config.auth.allowPasswordAdminSignup) {
+    return res.status(403).json({ error: "Password login is disabled for admin accounts" });
+  }
+
+  if (user?.passwordHash?.startsWith("oauth:")) {
+    return res.status(403).json({ error: "This account must sign in with OAuth" });
+  }
+
   if (!user || !verifyPassword(password || "", user.passwordHash)) {
     return res.status(401).json({ error: "Invalid email or password" });
   }
@@ -126,6 +140,10 @@ async function changePassword(req, res) {
   }
 
   const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+  if (user?.passwordHash?.startsWith("oauth:")) {
+    return res.status(403).json({ error: "Password is managed by OAuth provider" });
+  }
+
   if (!user || !verifyPassword(currentPassword || "", user.passwordHash)) {
     return res.status(401).json({ error: "Current password is incorrect" });
   }
@@ -158,7 +176,7 @@ async function requestPasswordReset(req, res) {
     message: "If an account exists, a password reset link will be sent.",
   };
 
-  if (!config.isProduction && resetToken) {
+  if ((config.nodeEnv === "development" || config.nodeEnv === "test") && resetToken) {
     response.resetToken = resetToken;
   }
 
@@ -297,7 +315,6 @@ function authConfig(req, res) {
     passwordAuth: config.auth.allowPasswordAuth,
     github: Boolean(config.auth.github.clientId && config.auth.github.clientSecret),
     google: Boolean(config.auth.google.clientId && config.auth.google.clientSecret),
-    adminEmails: config.isProduction ? undefined : config.auth.adminEmails,
   });
 }
 

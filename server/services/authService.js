@@ -4,13 +4,11 @@ const TOKEN_TTL_SECONDS = 60 * 60 * 24 * 7;
 const COOKIE_NAME = "ih_token";
 
 function getSecret() {
-  if (process.env.AUTH_SECRET) return process.env.AUTH_SECRET;
-
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("AUTH_SECRET is required in production");
+  if (!process.env.AUTH_SECRET) {
+    throw new Error("AUTH_SECRET is required");
   }
 
-  return "dev-only-change-me";
+  return process.env.AUTH_SECRET;
 }
 
 function base64Url(input) {

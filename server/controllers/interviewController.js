@@ -47,7 +47,7 @@ async function startInterview(req, res) {
     });
   } catch (error) {
     console.error("❌ Start interview error:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Failed to start interview" });
   }
 }
 
@@ -149,7 +149,7 @@ Respond with JSON: { "score": <1-10>, "feedback": "brief feedback" }`;
     }
   } catch (error) {
     console.error("❌ Submit answer error:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Failed to submit answer" });
   }
 }
 
@@ -178,7 +178,7 @@ async function getInterviewSummary(req, res) {
     });
   } catch (error) {
     console.error("❌ Get summary error:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Failed to fetch interview summary" });
   }
 }
 

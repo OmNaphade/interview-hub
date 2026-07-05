@@ -11,7 +11,7 @@ async function getAllProgress(req, res) {
     res.json(progress);
   } catch (error) {
     console.error("❌ Get progress error:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Failed to fetch progress" });
   }
 }
 
@@ -38,7 +38,7 @@ async function updateProgress(req, res) {
     res.json(progress);
   } catch (error) {
     console.error("❌ Update progress error:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Failed to update progress" });
   }
 }
 
@@ -56,7 +56,7 @@ async function getBookmarks(req, res) {
     res.json(bookmarks);
   } catch (error) {
     console.error("❌ Get bookmarks error:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Failed to fetch bookmarks" });
   }
 }
 
@@ -82,7 +82,7 @@ async function addBookmark(req, res) {
     res.status(201).json(bookmark);
   } catch (error) {
     console.error("❌ Add bookmark error:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Failed to add bookmark" });
   }
 }
 
@@ -98,7 +98,7 @@ async function removeBookmark(req, res) {
     res.json({ message: "Bookmark removed" });
   } catch (error) {
     console.error("❌ Remove bookmark error:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Failed to remove bookmark" });
   }
 }
 

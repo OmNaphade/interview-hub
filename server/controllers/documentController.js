@@ -19,6 +19,48 @@ const fs = require("fs");
 const path = require("path");
 const config = require("../config");
 
+const serverRoot = path.resolve(__dirname, "..");
+const allowedIngestionRoots = [
+  path.resolve(serverRoot, "datafiles"),
+  path.resolve(serverRoot, "data"),
+  path.resolve(serverRoot, config.datafiles.path || "datafiles"),
+];
+
+function normalizeIngestFilePath(filePath) {
+  const rawPath = String(filePath || "").trim();
+  if (!rawPath) {
+    throw new Error("A file path is required");
+  }
+
+  const candidate = path.isAbsolute(rawPath)
+    ? path.resolve(rawPath)
+    : path.resolve(serverRoot, rawPath);
+
+  const isAllowed = allowedIngestionRoots.some((root) => {
+    const normalizedRoot = path.resolve(root);
+    return candidate === normalizedRoot || candidate.startsWith(`${normalizedRoot}${path.sep}`);
+  });
+
+  if (!isAllowed) {
+    throw new Error("File path is outside allowed ingestion directories");
+  }
+
+  if (!fs.existsSync(candidate)) {
+    throw new Error("File not found");
+  }
+
+  const stat = fs.statSync(candidate);
+  if (!stat.isFile()) {
+    throw new Error("Provided path is not a file");
+  }
+
+  if (stat.size > 20 * 1024 * 1024) {
+    throw new Error("File is too large (max 20MB)");
+  }
+
+  return candidate;
+}
+
 // Ingest document (PDF, DOCX, or URL)
 async function ingestDocument(req, res) {
   const { fileType, filePath, url } = req.body;
@@ -27,16 +69,29 @@ async function ingestDocument(req, res) {
     let text = "";
     let hash = "";
     let filename = "";
+    let storedFilePath = null;
 
     // Extract text based on file type
     if (fileType === "pdf" && filePath) {
-      text = await extractPDF(filePath);
-      hash = calculateHash(filePath);
-      filename = path.basename(filePath);
+      const safeFilePath = normalizeIngestFilePath(filePath);
+      if (path.extname(safeFilePath).toLowerCase() !== ".pdf") {
+        return res.status(400).json({ error: "PDF ingestion requires a .pdf file" });
+      }
+
+      text = await extractPDF(safeFilePath);
+      hash = calculateHash(safeFilePath);
+      filename = path.basename(safeFilePath);
+      storedFilePath = safeFilePath;
     } else if (fileType === "docx" && filePath) {
-      text = await extractDOCX(filePath);
-      hash = calculateHash(filePath);
-      filename = path.basename(filePath);
+      const safeFilePath = normalizeIngestFilePath(filePath);
+      if (path.extname(safeFilePath).toLowerCase() !== ".docx") {
+        return res.status(400).json({ error: "DOCX ingestion requires a .docx file" });
+      }
+
+      text = await extractDOCX(safeFilePath);
+      hash = calculateHash(safeFilePath);
+      filename = path.basename(safeFilePath);
+      storedFilePath = safeFilePath;
     } else if (fileType === "url" && url) {
       text = await extractURL(url);
       hash = calculateTextHash(text);
@@ -67,7 +122,7 @@ async function ingestDocument(req, res) {
         userId: req.user.id,
         fileType,
         fileHash: hash,
-        filePath: fileType !== "url" ? filePath : null,
+        filePath: fileType !== "url" ? storedFilePath : null,
         status: "processing",
         topicTags: topics,
       },
@@ -109,7 +164,7 @@ async function ingestDocument(req, res) {
     });
   } catch (error) {
     console.error("❌ Ingest document error:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Failed to ingest document" });
   }
 }
 
@@ -129,7 +184,7 @@ async function getDocuments(req, res) {
     res.json(documents);
   } catch (error) {
     console.error("❌ Get documents error:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Failed to fetch documents" });
   }
 }
 
@@ -157,7 +212,7 @@ async function getChunks(req, res) {
     res.json(chunks);
   } catch (error) {
     console.error("❌ Get chunks error:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Failed to fetch document chunks" });
   }
 }
 
@@ -174,7 +229,7 @@ async function deleteDocument(req, res) {
     res.json({ message: "Document deleted successfully" });
   } catch (error) {
     console.error("❌ Delete document error:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Failed to delete document" });
   }
 }
 
@@ -213,7 +268,7 @@ async function generateQuestions(req, res) {
     });
   } catch (error) {
     console.error("❌ Generate questions error:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Failed to generate questions" });
   }
 }
 
@@ -235,7 +290,7 @@ async function searchDocuments(req, res) {
     });
   } catch (error) {
     console.error("❌ Search documents error:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Failed to search documents" });
   }
 }
 

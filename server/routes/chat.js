@@ -23,7 +23,7 @@ router.post("/sessions", asyncHandler(chatController.createSession));
 router.delete("/sessions/:sessionId", asyncHandler(chatController.deleteSession));
 
 // Stream chat response
-router.get("/stream", streamHandler, asyncHandler(chatController.streamMessage));
+router.post("/stream", streamHandler, asyncHandler(chatController.streamMessage));
 
 // Get coding hint
 router.post("/hint", asyncHandler(chatController.getHint));

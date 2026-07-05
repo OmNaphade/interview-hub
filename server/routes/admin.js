@@ -8,6 +8,7 @@ const adminController = require("../controllers/adminController");
 router.use(requireAuth, requireAdmin);
 
 router.get("/dashboard", asyncHandler(adminController.dashboard));
+router.get("/monitoring", asyncHandler(adminController.monitoring));
 router.get("/users", asyncHandler(adminController.listUsers));
 router.delete("/users/:userId", asyncHandler(adminController.deleteUser));
 router.get("/progress", asyncHandler(adminController.listProgress));

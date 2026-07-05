@@ -26,7 +26,7 @@ const ChatPage = () => {
     setSessions,
   } = useChatStore()
   const messagesEndRef = useRef(null)
-  const [eventSource, setEventSource] = useState(null)
+  const [streamController, setStreamController] = useState(null)
   const [isStreaming, setIsStreaming] = useState(false)
 
   useEffect(() => {
@@ -84,56 +84,92 @@ const ChatPage = () => {
     // Stream AI response
     try {
       setIsStreaming(true)
-      const esource = new EventSource(
-        `/api/chat/stream?sessionId=${sessionId}&message=${encodeURIComponent(
-          message
-        )}&mode=${chatMode}`
-      )
-
-      setEventSource(esource)
+      const controller = new AbortController()
+      setStreamController(controller)
       let fullResponse = ''
 
-      esource.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data)
-          if (data.done) {
-            finishStreamingMessage()
-            esource.close()
-            setEventSource(null)
-            setIsStreaming(false)
-            return
-          }
+      const response = await fetch('/api/chat/stream', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sessionId, message, mode: chatMode }),
+        signal: controller.signal,
+      })
 
-          if (data.token) {
-            fullResponse += data.token
-            updateStreamingMessage(fullResponse)
-          } else if (data.error) {
-            updateStreamingMessage(data.error)
-            finishStreamingMessage()
-            esource.close()
-            setEventSource(null)
-            setIsStreaming(false)
-          }
-        } catch (e) {}
+      if (!response.ok || !response.body) {
+        throw new Error('Failed to start streaming response')
       }
 
-      esource.onerror = () => {
-        esource.close()
-        setEventSource(null)
-        setIsStreaming(false)
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        buffer += decoder.decode(value, { stream: true })
+        const events = buffer.split('\n\n')
+        buffer = events.pop() || ''
+
+        for (const event of events) {
+          const line = event
+            .split('\n')
+            .find((item) => item.startsWith('data: '))
+
+          if (!line) continue
+
+          try {
+            const data = JSON.parse(line.slice(6))
+            if (data.done) {
+              finishStreamingMessage()
+              setStreamController(null)
+              setIsStreaming(false)
+              return
+            }
+
+            if (data.token) {
+              fullResponse += data.token
+              updateStreamingMessage(fullResponse)
+            } else if (data.error) {
+              updateStreamingMessage(data.error)
+              finishStreamingMessage()
+              setStreamController(null)
+              setIsStreaming(false)
+              return
+            }
+          } catch (e) {
+            console.debug('Skipping malformed SSE chunk:', e)
+          }
+        }
+      }
+
+      if (fullResponse) {
         finishStreamingMessage()
       }
-    } catch (error) {
-      console.error('Failed to stream message:', error)
+      setStreamController(null)
       setIsStreaming(false)
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        setStreamController(null)
+        setIsStreaming(false)
+        return
+      }
+
+      console.error('Failed to stream message:', error)
+      setStreamController(null)
+      setIsStreaming(false)
+      finishStreamingMessage()
     }
   }
 
   const handleStopStreaming = () => {
-    if (eventSource) {
-      eventSource.close()
+    if (streamController) {
+      streamController.abort()
       finishStreamingMessage()
-      setEventSource(null)
+      setStreamController(null)
       setIsStreaming(false)
     }
   }
@@ -177,7 +213,7 @@ const ChatPage = () => {
                 <>
                   {messages.map((msg, idx) => (
                     <MessageBubble
-                      key={idx}
+                      key={`${msg.role}-${msg.createdAt || ''}-${msg.content || ''}`}
                       role={msg.role}
                       content={msg.content}
                       sources={msg.sources}

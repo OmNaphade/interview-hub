@@ -38,7 +38,7 @@ async function getQuestionsByTopic(req, res) {
     res.json([...questions, ...builtinQuestions]);
   } catch (error) {
     console.error("❌ Get questions error:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Failed to fetch questions" });
   }
 }
 
@@ -63,7 +63,7 @@ async function getQuestion(req, res) {
     res.json(question);
   } catch (error) {
     console.error("❌ Get question error:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Failed to fetch question" });
   }
 }
 

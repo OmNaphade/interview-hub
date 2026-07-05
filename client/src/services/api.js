@@ -106,6 +106,7 @@ export const statusAPI = {
 
 export const adminAPI = {
   dashboard: () => api.get('/admin/dashboard'),
+  monitoring: (params = {}) => api.get('/admin/monitoring', { params }),
   getUsers: () => api.get('/admin/users'),
   deleteUser: (userId) => api.delete(`/admin/users/${userId}`),
   getProgress: (params = {}) => api.get('/admin/progress', { params }),
@@ -123,12 +124,59 @@ export const adminAPI = {
 
 // ─── STREAMING (SSE) ──────────────────────────────────
 
-export const streamChat = (sessionId, message, mode) => {
-  return new EventSource(
-    `/api/chat/stream?sessionId=${sessionId}&message=${encodeURIComponent(
-      message
-    )}&mode=${mode}`
-  )
+export const streamChat = async ({
+  sessionId,
+  message,
+  mode,
+  onToken,
+  onDone,
+  onError,
+  signal,
+}) => {
+  const response = await fetch('/api/chat/stream', {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ sessionId, message, mode }),
+    signal,
+  })
+
+  if (!response.ok || !response.body) {
+    const payload = await response.text()
+    throw new Error(payload || 'Failed to start chat stream')
+  }
+
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+
+    buffer += decoder.decode(value, { stream: true })
+    const events = buffer.split('\n\n')
+    buffer = events.pop() || ''
+
+    for (const event of events) {
+      const line = event
+        .split('\n')
+        .find((item) => item.startsWith('data: '))
+
+      if (!line) continue
+
+      try {
+        const data = JSON.parse(line.slice(6))
+        if (data.token && onToken) onToken(data.token)
+        if (data.error && onError) onError(data.error)
+        if (data.done && onDone) onDone()
+      } catch {
+        // Ignore malformed chunks.
+      }
+    }
+  }
 }
 
 export default api

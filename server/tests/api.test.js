@@ -1,6 +1,8 @@
 process.env.NODE_ENV = "test";
 process.env.AUTH_SECRET = "test-secret-that-is-longer-than-32-characters";
 process.env.ALLOW_PASSWORD_AUTH = "true";
+process.env.ALLOW_PASSWORD_ADMIN_SIGNUP = "true";
+process.env.ADMIN_EMAILS = "masteroman1234@gmail.com";
 process.env.DATABASE_URL = "postgresql://user:pass@localhost:5432/test";
 
 const assert = require("node:assert/strict");
@@ -308,6 +310,21 @@ require.cache[require.resolve("../prisma/client")] = {
 require.cache[require.resolve("../services/ollamaService")] = {
   id: require.resolve("../services/ollamaService"),
   filename: require.resolve("../services/ollamaService"),
+  loaded: true,
+  exports: {
+    chat: async () => "mocked ai response",
+    ping: async () => true,
+    streamChat: async (res) => {
+      res.write(`data: ${JSON.stringify({ token: "mocked stream" })}\n\n`);
+      res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+      res.end();
+    },
+  },
+};
+
+require.cache[require.resolve("../services/groqService")] = {
+  id: require.resolve("../services/groqService"),
+  filename: require.resolve("../services/groqService"),
   loaded: true,
   exports: {
     chat: async () => "mocked ai response",

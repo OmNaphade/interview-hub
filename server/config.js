@@ -72,7 +72,8 @@ module.exports = {
   },
   auth: {
     allowPasswordAuth: process.env.ALLOW_PASSWORD_AUTH !== "false",
-    adminEmails: parseList(process.env.ADMIN_EMAILS || "masteroman1234@gmail.com"),
+    allowPasswordAdminSignup: process.env.ALLOW_PASSWORD_ADMIN_SIGNUP === "true",
+    adminEmails: parseList(process.env.ADMIN_EMAILS || ""),
     frontendUrl,
     github: {
       clientId: process.env.GITHUB_CLIENT_ID || "",
@@ -108,5 +109,8 @@ module.exports = {
     chunkSize: parseInteger("CHUNK_SIZE", 500),
     chunkOverlap: parseInteger("CHUNK_OVERLAP", 50),
     topK: parseInteger("TOP_K_CHUNKS", 5),
+  },
+  rateLimit: {
+    redisUrl: process.env.REDIS_URL || "",
   },
 };

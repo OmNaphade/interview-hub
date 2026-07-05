@@ -1,6 +1,7 @@
 const { prisma } = require("../prisma/client");
 const config = require("../config");
 const { publicUser } = require("../services/authService");
+const { getMonitoringSnapshot } = require("../services/monitoringService");
 
 function adminFlag(user) {
   return config.auth.adminEmails.includes(String(user.email || "").toLowerCase());
@@ -44,6 +45,12 @@ async function dashboard(req, res) {
     },
     adminEmails: config.auth.adminEmails,
   });
+}
+
+async function monitoring(req, res) {
+  const window = String(req.query.window || "15m");
+  const endpointKey = String(req.query.endpoint || "");
+  res.json(getMonitoringSnapshot({ window, endpointKey }));
 }
 
 async function listUsers(req, res) {
@@ -250,6 +257,7 @@ async function deleteRoadmapItem(req, res) {
 
 module.exports = {
   dashboard,
+  monitoring,
   listUsers,
   deleteUser,
   listProgress,

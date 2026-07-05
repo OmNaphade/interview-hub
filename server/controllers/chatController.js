@@ -72,7 +72,15 @@ async function deleteSession(req, res) {
 
 // Stream chat message
 async function streamMessage(req, res) {
-  const { sessionId, message, mode } = req.query;
+  const { sessionId, message, mode } = req.body || {};
+
+  if (!sessionId || typeof sessionId !== "string") {
+    return res.status(400).json({ error: "Valid sessionId is required" });
+  }
+
+  if (!message || typeof message !== "string" || !message.trim()) {
+    return res.status(400).json({ error: "Message is required" });
+  }
 
   try {
     // Get session with history
@@ -91,11 +99,11 @@ async function streamMessage(req, res) {
     }
 
     // Save user message
-    const userMessage = await prisma.message.create({
+    await prisma.message.create({
       data: {
         sessionId,
         role: "user",
-        content: message,
+        content: message.trim(),
       },
     });
 
@@ -104,15 +112,15 @@ async function streamMessage(req, res) {
       role: m.role,
       content: m.content,
     }));
-    messages.push({ role: "user", content: message });
+    messages.push({ role: "user", content: message.trim() });
 
     // Build system prompt based on mode
     let systemPrompt = "";
     let ragChunks = [];
 
     if (mode === "rag") {
-      ragChunks = await getRelevantChunks(message, 5, req.user.id);
-      systemPrompt = buildRAGPrompt(ragChunks, message);
+      ragChunks = await getRelevantChunks(message.trim(), 5, req.user.id);
+      systemPrompt = buildRAGPrompt(ragChunks, message.trim());
     } else {
       systemPrompt = buildSystemPrompt(mode);
     }
@@ -153,7 +161,7 @@ async function streamMessage(req, res) {
     await streamChat(res, messages, systemPrompt, session.model || config.groq.chatModel);
   } catch (error) {
     console.error("❌ Stream message error:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Failed to stream chat response" });
   }
 }
 
@@ -176,7 +184,7 @@ Language: ${language}`;
     res.json({ hint: response });
   } catch (error) {
     console.error("❌ Hint error:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Failed to generate hint" });
   }
 }
 
@@ -202,7 +210,7 @@ Provide concise, actionable feedback.`;
     res.json({ review: response });
   } catch (error) {
     console.error("❌ Review error:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Failed to generate code review" });
   }
 }
 
