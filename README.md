@@ -22,6 +22,7 @@ Interview Hub helps engineers prepare for technical interviews using AI — not 
 - **Mock interview engine** — AI-powered answer scoring via GROQ
 - **Progress tracking** — per-topic study tracking, bookmarks, and completion stats
 - **Full auth** — email/password, Google OAuth, GitHub OAuth
+- **Admin monitoring** — request metrics, endpoint latency, GROQ/container activity, runtime health
 
 ---
 
@@ -168,6 +169,85 @@ npm run dev                 # :5173
 | Ollama | http://localhost:11434 |
 
 See [SETUP.md](./SETUP.md) for a detailed walkthrough and [DEPLOYMENT.md](./DEPLOYMENT.md) for production deployment.
+
+---
+
+## Backend Environment Variables
+
+Use `.env.example` as a template. Never commit real secrets.
+
+### Required in production
+
+| Variable | Description |
+|---|---|
+| DATABASE_URL | PostgreSQL connection string |
+| AUTH_SECRET | JWT signing secret (minimum 32 characters) |
+| CORS_ORIGINS | Allowed frontend origins (comma-separated) |
+
+### Recommended
+
+| Variable | Description |
+|---|---|
+| FRONTEND_URL | Canonical frontend URL for redirects |
+| ADMIN_EMAILS | Admin allowlist (comma-separated emails) |
+| ALLOW_PASSWORD_AUTH | Enable/disable email-password auth (`true`/`false`) |
+| ALLOW_PASSWORD_ADMIN_SIGNUP | Allow password-based admin signup (`false` in production) |
+| GROQ_API_KEY | GROQ API key |
+| GROQ_MODEL | GROQ model name (defaults to `llama-3.1-8b-instant`) |
+
+### Optional
+
+| Variable | Description |
+|---|---|
+| REDIS_URL | Shared rate-limit store for multi-instance deployments |
+| OLLAMA_BASE_URL | Ollama endpoint for embeddings |
+| OLLAMA_API_KEY | Optional Ollama auth key |
+| EMBED_MODEL | Ollama embedding model |
+| DATAFILES_PATH | Datafiles directory path |
+| CHUNK_SIZE | RAG chunk size |
+| CHUNK_OVERLAP | RAG chunk overlap |
+| TOP_K_CHUNKS | RAG retrieval top-k |
+| TRUST_PROXY | `true` behind Render/ingress proxies |
+| GITHUB_CLIENT_ID / GITHUB_CLIENT_SECRET / GITHUB_CALLBACK_URL | GitHub OAuth setup |
+| GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET / GOOGLE_CALLBACK_URL | Google OAuth setup |
+
+> Important: `CHAT_MODEL` is not used by current backend config. Use `GROQ_MODEL` for chat model selection.
+
+---
+
+## Render Deployment Notes
+
+If deployment fails during `prisma migrate deploy` with an error like:
+
+`FATAL: (ENOTFOUND) tenant/user ... not found`
+
+it usually means the `DATABASE_URL` is incorrect for your Supabase tenant or credentials.
+
+Checklist:
+
+1. Copy the exact Prisma connection string from Supabase (same project and region).
+2. Ensure host and username/project-ref match the same project.
+3. URL-encode password special characters (`@`, `:`, `/`, `?`, `#`, `%`).
+4. Re-save `DATABASE_URL` in Render and redeploy.
+
+---
+
+## Troubleshooting (Windows Git)
+
+If `git add -A` fails with:
+
+`error: invalid path 'nul'`
+
+then a Windows-reserved path was created in repo root. Remove it with:
+
+```powershell
+Set-Location "d:\PRACTICE\interview-hub"
+Remove-Item -LiteralPath "\\?\d:\PRACTICE\interview-hub\nul" -Force -ErrorAction SilentlyContinue
+Remove-Item -LiteralPath "\\?\d:\PRACTICE\interview-hub\nul\" -Recurse -Force -ErrorAction SilentlyContinue
+git add -A -- .
+```
+
+This repository includes `.gitattributes` to stabilize line endings and reduce CRLF/LF warnings.
 
 ---
 
